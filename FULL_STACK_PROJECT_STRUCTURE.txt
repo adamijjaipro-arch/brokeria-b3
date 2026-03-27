@@ -1,0 +1,364 @@
+broker-ia-intelligent/
+├── backend/
+│   ├── src/
+│   │   ├── main.ts
+│   │   ├── app.module.ts
+│   │   ├── app.controller.ts
+│   │   ├── app.service.ts
+│   │   │
+│   │   ├── auth/
+│   │   │   ├── auth.controller.ts
+│   │   │   ├── auth.service.ts
+│   │   │   ├── auth.module.ts
+│   │   │   ├── jwt.strategy.ts
+│   │   │   ├── jwt.guard.ts
+│   │   │   ├── jwt-payload.interface.ts
+│   │   │   └── dto/
+│   │   │       ├── register.dto.ts
+│   │   │       ├── login.dto.ts
+│   │   │       └── login-response.dto.ts
+│   │   │
+│   │   ├── users/
+│   │   │   ├── users.controller.ts
+│   │   │   ├── users.service.ts
+│   │   │   ├── users.module.ts
+│   │   │   └── dto/
+│   │   │       ├── create-user.dto.ts
+│   │   │       ├── update-user.dto.ts
+│   │   │       └── user.dto.ts
+│   │   │
+│   │   ├── strategies/
+│   │   │   ├── strategies.controller.ts
+│   │   │   ├── strategies.service.ts
+│   │   │   ├── strategies.module.ts
+│   │   │   ├── strategy.entity.ts
+│   │   │   └── dto/
+│   │   │       ├── create-strategy.dto.ts
+│   │   │       ├── update-strategy.dto.ts
+│   │   │       └── strategy.dto.ts
+│   │   │
+│   │   ├── signals/
+│   │   │   ├── signals.controller.ts
+│   │   │   ├── signals.service.ts
+│   │   │   ├── signals.module.ts
+│   │   │   ├── signal.entity.ts
+│   │   │   ├── signals.gateway.ts
+│   │   │   └── dto/
+│   │   │       ├── create-signal.dto.ts
+│   │   │       ├── signal.dto.ts
+│   │   │       └── signal-filter.dto.ts
+│   │   │
+│   │   ├── ai/
+│   │   │   ├── ai.controller.ts
+│   │   │   ├── ai.service.ts
+│   │   │   ├── ai.module.ts
+│   │   │   ├── ai.gateway.ts
+│   │   │   └── dto/
+│   │   │       ├── analyze-strategy.dto.ts
+│   │   │       ├── detect-patterns.dto.ts
+│   │   │       └── generate-signal.dto.ts
+│   │   │
+│   │   ├── simulator/
+│   │   │   ├── simulator.controller.ts
+│   │   │   ├── simulator.service.ts
+│   │   │   ├── simulator.module.ts
+│   │   │   └── dto/
+│   │   │       ├── dca-simulator.dto.ts
+│   │   │       └── simulator-result.dto.ts
+│   │   │
+│   │   ├── reports/
+│   │   │   ├── reports.controller.ts
+│   │   │   ├── reports.service.ts
+│   │   │   ├── reports.module.ts
+│   │   │   ├── report.entity.ts
+│   │   │   └── dto/
+│   │   │       ├── monthly-report.dto.ts
+│   │   │       └── report-stats.dto.ts
+│   │   │
+│   │   ├── payments/
+│   │   │   ├── payments.controller.ts
+│   │   │   ├── payments.service.ts
+│   │   │   └── payments.module.ts
+│   │   │
+│   │   ├── common/
+│   │   │   ├── decorators/
+│   │   │   │   └── get-user.decorator.ts
+│   │   │   ├── filters/
+│   │   │   │   └── http-exception.filter.ts
+│   │   │   ├── interceptors/
+│   │   │   │   └── transform.interceptor.ts
+│   │   │   └── pipes/
+│   │   │       └── validation.pipe.ts
+│   │   │
+│   │   └── database/
+│   │       ├── prisma.service.ts
+│   │       └── prisma.module.ts
+│   │
+│   ├── prisma/
+│   │   └── schema.prisma
+│   │
+│   ├── package.json
+│   ├── tsconfig.json
+│   ├── .env.example
+│   └── .gitignore
+│
+├── frontend/
+│   ├── src/
+│   │   ├── pages/
+│   │   │   ├── _app.tsx
+│   │   │   ├── _document.tsx
+│   │   │   ├── index.tsx
+│   │   │   ├── login.tsx
+│   │   │   ├── register.tsx
+│   │   │   ├── dashboard/
+│   │   │   │   └── index.tsx
+│   │   │   ├── signals/
+│   │   │   │   ├── index.tsx
+│   │   │   │   └── [id].tsx
+│   │   │   ├── strategies/
+│   │   │   │   ├── index.tsx
+│   │   │   │   └── new.tsx
+│   │   │   ├── simulator/
+│   │   │   │   └── index.tsx
+│   │   │   ├── reports/
+│   │   │   │   └── index.tsx
+│   │   │   ├── profile/
+│   │   │   │   └── index.tsx
+│   │   │   ├── pricing/
+│   │   │   │   └── index.tsx
+│   │   │   └── ai/
+│   │   │       ├── index.tsx
+│   │   │       ├── analyze.tsx
+│   │   │       └── patterns.tsx
+│   │   │
+│   │   ├── components/
+│   │   │   ├── layout/
+│   │   │   │   ├── Navbar.tsx
+│   │   │   │   ├── Sidebar.tsx
+│   │   │   │   ├── Footer.tsx
+│   │   │   │   └── Layout.tsx
+│   │   │   ├── auth/
+│   │   │   │   ├── LoginForm.tsx
+│   │   │   │   └── RegisterForm.tsx
+│   │   │   ├── signals/
+│   │   │   │   ├── SignalCard.tsx
+│   │   │   │   ├── SignalList.tsx
+│   │   │   │   └── SignalDetail.tsx
+│   │   │   ├── ai/
+│   │   │   │   ├── StrategyAnalyzer.tsx
+│   │   │   │   ├── PatternDetector.tsx
+│   │   │   │   ├── PatternCard.tsx
+│   │   │   │   └── SignalGenerator.tsx
+│   │   │   ├── simulator/
+│   │   │   │   ├── DCAForm.tsx
+│   │   │   │   ├── DCAChart.tsx
+│   │   │   │   └── SimulatorResult.tsx
+│   │   │   ├── charts/
+│   │   │   │   ├── OHLC.tsx
+│   │   │   │   ├── Fibonacci.tsx
+│   │   │   │   └── Ichimoku.tsx
+│   │   │   ├── common/
+│   │   │   │   ├── Button.tsx
+│   │   │   │   ├── Card.tsx
+│   │   │   │   ├── Modal.tsx
+│   │   │   │   ├── Loading.tsx
+│   │   │   │   ├── Badge.tsx
+│   │   │   │   └── Alert.tsx
+│   │   │   └── dashboard/
+│   │   │       ├── DashboardStats.tsx
+│   │   │       ├── RecentSignals.tsx
+│   │   │       ├── PortfolioChart.tsx
+│   │   │       └── WinRate.tsx
+│   │   │
+│   │   ├── hooks/
+│   │   │   ├── useAuth.ts
+│   │   │   ├── useApi.ts
+│   │   │   ├── useSignals.ts
+│   │   │   ├── useStrategies.ts
+│   │   │   ├── useSimulator.ts
+│   │   │   └── useReports.ts
+│   │   │
+│   │   ├── stores/
+│   │   │   ├── authStore.ts
+│   │   │   ├── signalStore.ts
+│   │   │   ├── strategyStore.ts
+│   │   │   └── appStore.ts
+│   │   │
+│   │   ├── services/
+│   │   │   ├── api.ts
+│   │   │   ├── auth.ts
+│   │   │   ├── signals.ts
+│   │   │   ├── strategies.ts
+│   │   │   ├── ai.ts
+│   │   │   ├── simulator.ts
+│   │   │   └── reports.ts
+│   │   │
+│   │   ├── types/
+│   │   │   ├── index.ts
+│   │   │   ├── auth.ts
+│   │   │   ├── signal.ts
+│   │   │   ├── strategy.ts
+│   │   │   └── api.ts
+│   │   │
+│   │   ├── styles/
+│   │   │   └── globals.css
+│   │   │
+│   │   └── utils/
+│   │       ├── formatters.ts
+│   │       ├── validators.ts
+│   │       └── helpers.ts
+│   │
+│   ├── public/
+│   ├── package.json
+│   ├── tsconfig.json
+│   ├── tailwind.config.js
+│   ├── next.config.js
+│   ├── .env.local.example
+│   └── .gitignore
+│
+├── mobile/
+│   ├── src/
+│   │   ├── screens/
+│   │   │   ├── auth/
+│   │   │   │   ├── LoginScreen.tsx
+│   │   │   │   └── RegisterScreen.tsx
+│   │   │   ├── dashboard/
+│   │   │   │   └── DashboardScreen.tsx
+│   │   │   ├── signals/
+│   │   │   │   ├── SignalsScreen.tsx
+│   │   │   │   └── SignalDetailScreen.tsx
+│   │   │   ├── strategies/
+│   │   │   │   ├── StrategiesScreen.tsx
+│   │   │   │   └── UploadStrategyScreen.tsx
+│   │   │   ├── simulator/
+│   │   │   │   └── SimulatorScreen.tsx
+│   │   │   ├── reports/
+│   │   │   │   └── ReportsScreen.tsx
+│   │   │   ├── profile/
+│   │   │   │   └── ProfileScreen.tsx
+│   │   │   ├── ai/
+│   │   │   │   ├── AIAnalysisScreen.tsx
+│   │   │   │   └── PatternsScreen.tsx
+│   │   │   └── education/
+│   │   │       ├── EducationScreen.tsx
+│   │   │       └── CourseDetailScreen.tsx
+│   │   │
+│   │   ├── components/
+│   │   │   ├── common/
+│   │   │   │   ├── Button.tsx
+│   │   │   │   ├── Card.tsx
+│   │   │   │   ├── Loading.tsx
+│   │   │   │   ├── Badge.tsx
+│   │   │   │   ├── Modal.tsx
+│   │   │   │   ├── Input.tsx
+│   │   │   │   └── Alert.tsx
+│   │   │   ├── signals/
+│   │   │   │   ├── SignalCard.tsx
+│   │   │   │   └── SignalList.tsx
+│   │   │   ├── charts/
+│   │   │   │   ├── LineChart.tsx
+│   │   │   │   ├── CandleChart.tsx
+│   │   │   │   └── PerformanceChart.tsx
+│   │   │   ├── forms/
+│   │   │   │   ├── StrategyUploadForm.tsx
+│   │   │   │   └── DCAForm.tsx
+│   │   │   └── navigation/
+│   │   │       ├── BottomTabNavigator.tsx
+│   │   │       └── RootNavigator.tsx
+│   │   │
+│   │   ├── hooks/
+│   │   │   ├── useAuth.ts
+│   │   │   ├── useApi.ts
+│   │   │   ├── useStorage.ts
+│   │   │   └── useNavigation.ts
+│   │   │
+│   │   ├── services/
+│   │   │   ├── api.ts
+│   │   │   ├── auth.ts
+│   │   │   ├── storage.ts
+│   │   │   ├── signals.ts
+│   │   │   ├── strategies.ts
+│   │   │   ├── ai.ts
+│   │   │   └── simulator.ts
+│   │   │
+│   │   ├── store/
+│   │   │   ├── authStore.ts
+│   │   │   ├── appStore.ts
+│   │   │   └── signalStore.ts
+│   │   │
+│   │   ├── types/
+│   │   │   └── index.ts
+│   │   │
+│   │   ├── utils/
+│   │   │   ├── formatters.ts
+│   │   │   └── helpers.ts
+│   │   │
+│   │   ├── App.tsx
+│   │   └── index.ts
+│   │
+│   ├── assets/
+│   │   ├── images/
+│   │   ├── icons/
+│   │   └── fonts/
+│   │
+│   ├── app.json
+│   ├── package.json
+│   ├── tsconfig.json
+│   ├── .env.example
+│   └── .gitignore
+│
+├── ai-module/
+│   ├── __init__.py
+│   ├── config.py
+│   │
+│   ├── nlp/
+│   │   ├── __init__.py
+│   │   ├── text_parser.py
+│   │   ├── rule_extractor.py
+│   │   ├── strategy_analyzer.py
+│   │   └── knowledge_base.py
+│   │
+│   ├── pattern_recognition/
+│   │   ├── __init__.py
+│   │   ├── candlestick_patterns.py
+│   │   ├── chart_patterns.py
+│   │   ├── fibonacci.py
+│   │   ├── harmonics.py
+│   │   ├── elliott_waves.py
+│   │   ├── ichimoku.py
+│   │   └── pattern_detector.py
+│   │
+│   ├── technical_analysis/
+│   │   ├── __init__.py
+│   │   ├── momentum.py
+│   │   ├── volatility.py
+│   │   ├── volume.py
+│   │   └── indicators_calculator.py
+│   │
+│   ├── signal_generation/
+│   │   ├── __init__.py
+│   │   ├── scoring_engine.py
+│   │   ├── signal_generator.py
+│   │   └── sl_tp_calculator.py
+│   │
+│   ├── simulation/
+│   │   ├── __init__.py
+│   │   ├── dca_simulator.py
+│   │   └── portfolio_projector.py
+│   │
+│   ├── reporting/
+│   │   ├── __init__.py
+│   │   ├── performance_tracker.py
+│   │   ├── monthly_reporter.py
+│   │   └── recommendations.py
+│   │
+│   ├── utils/
+│   │   ├── __init__.py
+│   │   ├── data_loader.py
+│   │   └── validators.py
+│   │
+│   ├── main.py
+│   ├── requirements.txt
+│   └── setup.py
+│
+└── docker-compose.yml

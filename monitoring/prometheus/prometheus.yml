@@ -1,0 +1,17 @@
+global:
+  scrape_interval:     15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: 'brokeria-monitor'
+
+scrape_configs:
+  - job_name: 'brokeria-backend'
+    static_configs:
+      - targets: ['backend:3001']
+    metrics_path: '/metrics'
+    # L'IP du container Prometheus est dans le réseau docker → whitelistée
+    # Ajouter l'IP du réseau docker dans METRICS_ALLOWED_IPS si nécessaire
+
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']

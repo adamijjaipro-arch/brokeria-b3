@@ -1,0 +1,43 @@
+import { Injectable } from '@nestjs/common';
+
+@Injectable()
+export class PrismaService {
+  private prisma: any;
+
+  constructor() {
+    const { PrismaClient } = require('@prisma/client');
+    this.prisma = new PrismaClient();
+  }
+
+  async onModuleInit() {
+    await this.prisma.$connect();
+  }
+
+  async onModuleDestroy() {
+    await this.prisma.$disconnect();
+  }
+
+  get user() {
+    return this.prisma.user;
+  }
+
+  get signal() {
+    return this.prisma.signal;
+  }
+
+  get strategy() {
+    return this.prisma.strategy;
+  }
+
+  get report() {
+    return this.prisma.report;
+  }
+
+  get authLog() {
+    return this.prisma.authLog;
+  }
+
+  get webAuthnCredential() {
+    return this.prisma.webAuthnCredential;
+  }
+}

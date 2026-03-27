@@ -1,0 +1,187 @@
+version: '3.8'
+
+# ─────────────────────────────────────────────────────────────────────────────
+# BrokerIA — Stack complète
+#   - postgres       : base de données principale
+#   - redis          : sessions, OTP, TOTP enroll, WebAuthn challenges
+#   - backend        : NestJS API (port 3001)
+#   - frontend       : Next.js (port 3002)
+#   - prometheus     : collecte des métriques (port 9090)
+#   - grafana        : dashboards (port 3003)
+#   - elasticsearch  : moteur SIEM (port 9200)
+#   - kibana         : UI SIEM (port 5601)
+#   - logstash       : pipeline logs → Elasticsearch (syslog UDP 514)
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+
+  # ── Base de données ──────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER:     ${POSTGRES_USER:-brokeria_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-brokeria_password}
+      POSTGRES_DB:       ${POSTGRES_DB:-brokeria}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test:     ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-brokeria_user}"]
+      interval: 10s
+      timeout:  5s
+      retries:  5
+
+  # ── Cache / sessions ─────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test:     ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout:  5s
+      retries:  5
+
+  # ── API NestJS ───────────────────────────────────────────────────────────────
+  backend:
+    build:
+      context:    ./backend-code
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      DATABASE_URL:          postgresql://${POSTGRES_USER:-brokeria_user}:${POSTGRES_PASSWORD:-brokeria_password}@postgres:5432/${POSTGRES_DB:-brokeria}
+      REDIS_URL:             redis://redis:6379
+      JWT_SECRET:            ${JWT_SECRET:?JWT_SECRET is required}
+      JWT_REFRESH_SECRET:    ${JWT_REFRESH_SECRET:?JWT_REFRESH_SECRET is required}
+      JWT_EXPIRATION:        ${JWT_EXPIRATION:-15m}
+      JWT_REFRESH_EXPIRATION: ${JWT_REFRESH_EXPIRATION:-7d}
+      NODE_ENV:              production
+      PORT:                  3001
+      FRONTEND_URL:          ${FRONTEND_URL:-http://localhost:3002}
+      CORS_ORIGINS:          ${CORS_ORIGINS:-http://localhost:3002}
+      SMTP_HOST:             ${SMTP_HOST}
+      SMTP_PORT:             ${SMTP_PORT:-587}
+      SMTP_USER:             ${SMTP_USER}
+      SMTP_PASS:             ${SMTP_PASS}
+      GITHUB_CLIENT_ID:      ${GITHUB_CLIENT_ID}
+      GITHUB_CLIENT_SECRET:  ${GITHUB_CLIENT_SECRET}
+      GITHUB_CALLBACK_URL:   ${GITHUB_CALLBACK_URL:-http://localhost:3001/auth/github/callback}
+      TOTP_ENCRYPTION_KEY:   ${TOTP_ENCRYPTION_KEY:?TOTP_ENCRYPTION_KEY is required (64 hex chars)}
+      WEBAUTHN_RP_NAME:      ${WEBAUTHN_RP_NAME:-BrokerIA}
+      WEBAUTHN_RP_ID:        ${WEBAUTHN_RP_ID:-localhost}
+      WEBAUTHN_ORIGIN:       ${WEBAUTHN_ORIGIN:-http://localhost:3002}
+      SYSLOG_HOST:           logstash
+      SYSLOG_PORT:           514
+      METRICS_ALLOWED_IPS:   ${METRICS_ALLOWED_IPS:-127.0.0.1,::1,::ffff:127.0.0.1,172.16.0.0/12}
+      APP_NAME:              brokeria
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./ai-module:/app/ai-module
+
+  # ── Frontend Next.js ─────────────────────────────────────────────────────────
+  frontend:
+    build:
+      context:    ./frontend-web
+      dockerfile: Dockerfile
+    ports:
+      - "3002:3000"
+    environment:
+      NEXT_PUBLIC_API_URL:         http://backend:3001
+      NEXT_PUBLIC_APP_NAME:        BrokerIA
+      NEXT_PUBLIC_WEBAUTHN_RP_ID:  ${WEBAUTHN_RP_ID:-localhost}
+    depends_on:
+      - backend
+
+  # ── Prometheus ───────────────────────────────────────────────────────────────
+  prometheus:
+    image: prom/prometheus:v2.51.0
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.enable-lifecycle'
+    depends_on:
+      - backend
+
+  # ── Grafana ──────────────────────────────────────────────────────────────────
+  grafana:
+    image: grafana/grafana:10.4.0
+    ports:
+      - "3003:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER:     ${GRAFANA_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-brokeria_grafana}
+      GF_USERS_ALLOW_SIGN_UP:     "false"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - prometheus
+
+  # ── Elasticsearch (SIEM) ─────────────────────────────────────────────────────
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.0
+    environment:
+      discovery.type:               single-node
+      xpack.security.enabled:       "true"
+      ELASTIC_PASSWORD:             "brokeria2026"
+      ES_JAVA_OPTS:                 "-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test:     ["CMD-SHELL", "curl -sf -u elastic:brokeria2026 http://localhost:9200/_cluster/health | grep -qv '\"status\":\"red\"'"]
+      interval: 30s
+      timeout:  10s
+      retries:  5
+
+  # ── Kibana ───────────────────────────────────────────────────────────────────
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.13.0
+    ports:
+      - "5601:5601"
+    environment:
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+      ELASTICSEARCH_USERNAME: kibana_system
+      ELASTICSEARCH_PASSWORD: kibana_brokeria2026
+      XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY: "brokeria2026brokeria2026brokeria2026brokeria2026brokeria2026broke"
+      XPACK_SECURITY_ENCRYPTIONKEY: "brokeria2026brokeria2026brokeria2026brokeria2026brokeria2026broke"
+      XPACK_REPORTING_ENCRYPTIONKEY: "brokeria2026brokeria2026brokeria2026brokeria2026brokeria2026broke"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+
+  # ── Logstash (pipeline Syslog UDP → Elasticsearch) ───────────────────────────
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.13.0
+    ports:
+      - "514:514/udp"    # Syslog UDP entrant depuis le backend
+    volumes:
+      - ./monitoring/logstash/pipeline:/usr/share/logstash/pipeline:ro
+    environment:
+      LS_JAVA_OPTS: "-Xms256m -Xmx256m"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  redis_data:
+  prometheus_data:
+  grafana_data:
+  elasticsearch_data:

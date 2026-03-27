@@ -1,0 +1,145 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// Prisma Schema — BrokerIA
+//
+// Architecture note :
+//   - SQLite pour le dev (zéro infra). En prod : changer provider → "postgresql".
+//   - Les refresh tokens sont stockés dans Redis (TTL natif, invalidation O(1)).
+//     L'ancien modèle RefreshToken est supprimé pour éviter la double source de vérité.
+//   - passwordHash est nullable : les utilisateurs GitHub / Magic Link n'ont pas de
+//     mot de passe local. On peut combiner les méthodes sur un même compte.
+// ─────────────────────────────────────────────────────────────────────────────
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                  String     @id @default(cuid())
+  username            String     @unique
+  email               String     @unique
+
+  // Null pour les utilisateurs GitHub/Magic Link sans mot de passe local
+  passwordHash        String?
+
+  // Null pour les utilisateurs email/password sans compte GitHub lié
+  githubId            String?    @unique
+
+  // Code PIN personnel (3ème facteur d'authentification)
+  pin                 String?
+
+  // TOTP (RFC 6238) — secret chiffré AES-256-GCM en base
+  totpSecret          String?
+  totpEnabled         Boolean    @default(false)
+
+  trading_preference  String?    @default("moderate")
+  email_notifications Boolean    @default(true)
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+
+  signals             Signal[]
+  strategies          Strategy[]
+  reports             Report[]
+  webAuthnCredentials WebAuthnCredential[]
+}
+
+// ─── WebAuthn / FIDO2 credentials ────────────────────────────────────────────
+model WebAuthnCredential {
+  id                   String   @id @default(cuid())
+  userId               String
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  credentialId         String   @unique  // base64url encoded
+  publicKey            String            // base64url encoded COSE key
+  counter              Int      @default(0)
+  deviceType           String?           // "singleDevice" | "multiDevice"
+  backedUp             Boolean  @default(false)
+  transports           String?           // JSON array of transports
+  aaguid               String?
+  createdAt            DateTime @default(now())
+  lastUsedAt           DateTime?
+
+  @@index([userId])
+}
+
+// ─── Refresh tokens → Redis (clé: refresh:{jti}, valeur: userId, TTL: 7j) ────
+// Alternative : garder ce modèle pour un audit trail des sessions actives.
+
+model Signal {
+  id                String   @id @default(cuid())
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  asset             String
+  direction         String   // BUY | SELL | HOLD
+  entry_price       Float
+  stop_loss         Float
+  take_profit       Float
+  confidence        Float
+  risk_reward_ratio Float?
+  patterns          String?  // JSON array
+  indicators        String?  // JSON object
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([userId])
+  @@index([asset])
+}
+
+model Strategy {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name          String
+  description   String?
+  code          String
+  asset         String
+  timeframe     String   // 15m | 1h | 4h | 1d
+  status        String   @default("inactive")
+  win_rate      Float?
+  total_trades  Int?
+  profit_factor Float?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Report {
+  id                      String   @id @default(cuid())
+  userId                  String
+  user                    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  month                   Int
+  year                    Int
+  total_signals           Int
+  buy_signals             Int
+  sell_signals            Int
+  hold_signals            Int
+  win_rate                Float
+  avg_confidence          Float
+  best_signal_confidence  Float
+  worst_signal_confidence Float
+  total_pnl_estimate      Float
+  total_trades_expected   Int
+  high_confidence_signals Int
+  patterns_detected       String?
+  indicators_used         String?
+  summary                 String?
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  @@unique([userId, month, year])
+  @@index([userId])
+}
+
+model AuthLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  action    String
+  result    String
+  ip        String?
+  detail    String?
+  createdAt DateTime @default(now())
+}
