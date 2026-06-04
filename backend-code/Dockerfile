@@ -1,16 +1,22 @@
 FROM node:18-alpine
-
 WORKDIR /app
 
+# ── Dépendances ───────────────────────────────────────────────────────────────
 COPY package*.json ./
-RUN npm ci --only=production
+RUN npm install
 
-COPY dist ./dist
-COPY ai-module ./ai-module
-COPY prisma ./prisma
+# ── Code source ───────────────────────────────────────────────────────────────
+COPY . .
 
-EXPOSE 3001
+# ── Génération Prisma + compilation NestJS ────────────────────────────────────
+RUN npx prisma generate
+RUN npm run build
 
+# ── Variables d'environnement ─────────────────────────────────────────────────
 ENV NODE_ENV=production
 
-CMD ["node", "dist/main.js"]
+# Railway injecte PORT automatiquement (l'app lit process.env.PORT)
+EXPOSE 3000
+
+# ── Démarrage : migration DB → lancement ─────────────────────────────────────
+CMD ["sh", "-c", "npx prisma db push --skip-generate --accept-data-loss && npm run start:prod"]

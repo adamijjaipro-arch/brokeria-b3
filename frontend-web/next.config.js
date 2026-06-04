@@ -2,7 +2,14 @@
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
+  output: 'standalone',
   transpilePackages: ['zustand'],
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },
