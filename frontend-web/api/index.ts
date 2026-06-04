@@ -63,10 +63,13 @@ api.interceptors.response.use(
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
     // Si ce n'est pas un 401 ou si c'est déjà une tentative de refresh → on propage
+    // Les endpoints d'auth ne doivent pas déclencher un refresh (leurs 401 = mauvais identifiants)
+    const AUTH_ENDPOINTS = ['/auth/refresh', '/auth/login', '/auth/register', '/auth/magic-link'];
+    const isAuthEndpoint = AUTH_ENDPOINTS.some((ep) => originalRequest.url?.startsWith(ep));
     if (
       error.response?.status !== 401 ||
       originalRequest._retry ||
-      originalRequest.url === '/auth/refresh'
+      isAuthEndpoint
     ) {
       return Promise.reject(error);
     }
@@ -85,20 +88,29 @@ api.interceptors.response.use(
     isRefreshing = true;
 
     try {
-      // Le cookie httpOnly est envoyé automatiquement grâce à withCredentials
-      const { data } = await axios.post<{ accessToken: string }>(
+      // Le cookie httpOnly est envoyé automatiquement grâce à withCredentials.
+      // axios brut (non api) → la réponse n'est PAS déroulée par l'intercepteur
+      // envelope. Le backend retourne { data: { accessToken } }, donc on lit data.data.
+      const { data } = await axios.post<{ data: { accessToken: string } }>(
         `${BASE_URL}/auth/refresh`,
         {},
         { withCredentials: true },
       );
 
-      const newToken = data.accessToken;
+      const newToken = data.data?.accessToken;
+      if (!newToken) throw new Error('refresh: no token');
 
-      // Met à jour le store Zustand (sans accéder aux hooks)
-      useAuthStore.getState().setAuth(
-        newToken,
-        useAuthStore.getState().user!,
-      );
+      // Restaure le user si perdu (ex: rechargement de page avant initAuth)
+      let user = useAuthStore.getState().user;
+      if (!user) {
+        const profRes = await axios.get<{ data: { id: string; email: string; username: string } }>(
+          `${BASE_URL}/auth/profile`,
+          { headers: { Authorization: `Bearer ${newToken}` }, withCredentials: true },
+        );
+        user = profRes.data.data;
+      }
+
+      useAuthStore.getState().setAuth(newToken, user!);
 
       processQueue(null, newToken);
       originalRequest.headers.Authorization = `Bearer ${newToken}`;
@@ -120,13 +132,13 @@ api.interceptors.response.use(
 // ─── Auth API ────────────────────────────────────────────────────────────────
 export const authApi = {
   login: (email: string, password: string) =>
-    api.post<{ preAuthToken: string }>(
+    api.post<{ accessToken: string; user: { id: string; email: string; username: string } }>(
       '/auth/login',
       { email, password },
     ),
 
   register: (email: string, username: string, password: string) =>
-    api.post<{ preAuthToken: string }>(
+    api.post<{ accessToken: string; user: { id: string; email: string; username: string } }>(
       '/auth/register',
       { email, username, password },
     ),
@@ -225,6 +237,16 @@ export const webAuthnApi = {
 
   removeCredential: (credentialId: string) =>
     api.delete(`/mfa/webauthn/credentials/${credentialId}`),
+};
+
+// ─── Formation API ────────────────────────────────────────────────────────────
+export const formationApi = {
+  getCourses: () => api.get('/formation/courses'),
+  getCourseById: (id: string) => api.get(`/formation/courses/${id}`),
+  getLessonById: (id: string) => api.get(`/formation/lessons/${id}`),
+  markComplete: (lessonId: string, courseId: string) =>
+    api.post('/formation/progress', { lessonId, courseId }),
+  getMyProgress: () => api.get('/formation/my-progress'),
 };
 
 export default api;

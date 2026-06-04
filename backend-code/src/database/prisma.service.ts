@@ -40,4 +40,16 @@ export class PrismaService {
   get webAuthnCredential() {
     return this.prisma.webAuthnCredential;
   }
+
+  get course() {
+    return this.prisma.course;
+  }
+
+  get lesson() {
+    return this.prisma.lesson;
+  }
+
+  get userProgress() {
+    return this.prisma.userProgress;
+  }
 }

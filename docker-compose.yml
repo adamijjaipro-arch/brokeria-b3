@@ -92,7 +92,7 @@ services:
       context:    ./frontend-web
       dockerfile: Dockerfile
     ports:
-      - "3002:3000"
+      - "3000:3000"
     environment:
       NEXT_PUBLIC_API_URL:         http://backend:3001
       NEXT_PUBLIC_APP_NAME:        BrokerIA

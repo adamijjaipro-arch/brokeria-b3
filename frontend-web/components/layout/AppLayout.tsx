@@ -35,6 +35,18 @@ const navItems = [
     ),
   },
   {
+    href: '/markets',
+    label: 'Marchés',
+    badge: null,
+    disabled: false,
+    icon: (
+      <svg width="40" height="40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+          d="M7 20V10m4 10V4m4 16v-7m4 7v-3" />
+      </svg>
+    ),
+  },
+  {
     href: '/signals',
     label: 'Signaux',
     badge: '12',
@@ -55,6 +67,30 @@ const navItems = [
       <svg width="40" height="40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
           d="M22 12h-4l-3 9L9 3l-3 9H2" />
+      </svg>
+    ),
+  },
+  {
+    href: '/strategies',
+    label: 'Stratégies',
+    badge: null,
+    disabled: false,
+    icon: (
+      <svg width="40" height="40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+      </svg>
+    ),
+  },
+  {
+    href: '/strategies/import',
+    label: 'Importer PDF',
+    badge: null,
+    disabled: false,
+    icon: (
+      <svg width="40" height="40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+          d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
       </svg>
     ),
   },

@@ -17,6 +17,7 @@ import { MetricsModule } from './metrics/metrics.module';
 import { LoggingModule } from './logging/logging.module';
 import { TotpModule } from './mfa/totp/totp.module';
 import { WebAuthnModule } from './mfa/webauthn/webauthn.module';
+import { FormationModule } from './formation/formation.module';
 
 @Module({
   imports: [
@@ -38,6 +39,8 @@ import { WebAuthnModule } from './mfa/webauthn/webauthn.module';
     // MFA
     TotpModule,
     WebAuthnModule,
+    // Formation
+    FormationModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -32,13 +32,6 @@ const Dashboard: NextPage = () => {
   const areaPath = `M0,${toY(values[0])} ` + values.map((v, i) => `L${(i / (values.length - 1)) * W},${toY(v)}`).join(' ') + ` L${W},${H} L0,${H} Z`;
   const linePath = `M0,${toY(values[0])} ` + values.map((v, i) => `L${(i / (values.length - 1)) * W},${toY(v)}`).join(' ');
 
-  const markets = [
-    { name: 'BTC', change: '+2.34%', positive: true, price: '$67 234,5', vol: '2.4B' },
-    { name: 'ETH', change: '-1.23%', positive: false, price: '$3 567,8', vol: '1.2B' },
-    { name: 'SOL', change: '+5.67%', positive: true, price: '$134,2', vol: '450M' },
-    { name: 'BNB', change: '+1.89%', positive: true, price: '$412,3', vol: '890M' },
-  ];
-
   return (
     <AppLayout
       title="Dashboard"
@@ -160,26 +153,6 @@ const Dashboard: NextPage = () => {
                 <span style={{ background: '#2563eb', color: 'white', fontSize: '11px', fontWeight: 700, padding: '2px 8px', borderRadius: '6px' }}>{s.dir}</span>
                 <p style={{ fontSize: '12px', fontWeight: 700, color: '#111827', margin: '2px 0 0', textAlign: 'center' }}>{s.conf}%</p>
               </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Marchés en direct */}
-      <div style={{ ...card, marginBottom: '24px' }}>
-        <div style={{ marginBottom: '16px' }}>
-          <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#111827', margin: 0 }}>Marchés en direct</h2>
-          <p style={{ fontSize: '12px', color: '#6b7280', margin: '2px 0 0' }}>Principales cryptomonnaies</p>
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
-          {markets.map((m, i) => (
-            <div key={i} style={{ background: '#f9fafb', borderRadius: '12px', padding: '16px', border: '1px solid #e5e7eb' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <span style={{ fontSize: '14px', fontWeight: 700, color: '#111827' }}>{m.name}</span>
-                <span style={{ fontSize: '12px', fontWeight: 700, color: m.positive ? '#10b981' : '#ef4444', background: m.positive ? '#f0fdf4' : '#fef2f2', padding: '2px 8px', borderRadius: '20px' }}>{m.change}</span>
-              </div>
-              <p style={{ fontSize: '15px', fontWeight: 700, color: '#111827', margin: '0 0 4px' }}>{m.price}</p>
-              <p style={{ fontSize: '11px', color: '#9ca3af', margin: 0 }}>Vol: {m.vol}</p>
             </div>
           ))}
         </div>
