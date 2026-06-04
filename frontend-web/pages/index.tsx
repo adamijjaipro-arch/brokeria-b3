@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Layout from '../components/layout/Layout';
 
 /* ═══════════════════════════════
-   BROKER IA — Landing Page Pro
+   ALVIO — Landing Page
    ═══════════════════════════════ */
 
 const TICKER = [
@@ -81,8 +81,8 @@ const Home: NextPage = () => {
   return (
     <Layout>
       <Head>
-        <title>Alvio — Signaux Crypto IA Précis à 95%</title>
-        <meta name="description" content="Plateforme de trading IA : signaux BUY/SELL en temps réel, 15+ patterns, simulateur DCA. Rejoignez 2400+ traders." />
+        <title>Alvio — AI-powered trading platform</title>
+        <meta name="description" content="Alvio : signaux BUY/SELL crypto en temps réel, 15+ patterns chartistes détectés par IA, simulateur DCA. Rejoignez 2 400+ traders." />
       </Head>
 
       {/* ══════════════════════════════════════
@@ -112,8 +112,8 @@ const Home: NextPage = () => {
 
           <h1 style={{ fontSize: 'clamp(40px, 6vw, 76px)', fontWeight: 800, color: 'white', lineHeight: 1.05, margin: '0 0 24px', letterSpacing: '-2px' }}>
             Tradez avec<br />
-            <span style={{ background: 'linear-gradient(135deg, #60a5fa, #2563eb, #06b6d4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-              l'Intelligence Artificielle
+            <span style={{ color: '#6366f1' }}>
+              l'Intelligence Alvio
             </span>
           </h1>
 

@@ -106,18 +106,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
           {/* Logo */}
           <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', flexShrink: 0 }}>
-            <div style={{
-              width: '36px', height: '36px', borderRadius: '10px',
-              background: 'linear-gradient(135deg, #2563eb, #06b6d4)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 0 16px rgba(37,99,235,0.45)',
-            }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="#fff" />
-              </svg>
-            </div>
-            <span style={{ fontSize: '18px', fontWeight: 800, color: '#fff', letterSpacing: '-0.3px' }}>
-              Broker<span style={{ background: 'linear-gradient(90deg,#2563eb,#06b6d4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>IA</span>
+            <svg width="32" height="32" viewBox="0 0 32 32" style={{ flexShrink: 0 }}>
+              <rect width="32" height="32" rx="8" fill="#0f172a"/>
+              <polygon points="16,4 28,26 4,26" fill="none"
+                stroke="#f59e0b" strokeWidth="2" strokeLinejoin="round"/>
+              <polyline points="7,22 11,15 15,18 20,9 26,13"
+                fill="none" stroke="#f59e0b" strokeWidth="2"
+                strokeLinecap="round" strokeLinejoin="round"/>
+              <circle cx="20" cy="9" r="2.5" fill="#10b981"/>
+            </svg>
+            <span style={{ fontSize: '20px', fontWeight: 700, color: '#fff', fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.3px' }}>
+              Alvio
             </span>
           </Link>
 
@@ -259,17 +258,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             {/* Brand */}
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
-                <div style={{
-                  width: '36px', height: '36px', borderRadius: '10px',
-                  background: 'linear-gradient(135deg, #2563eb, #06b6d4)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                }}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="#fff" />
-                  </svg>
-                </div>
-                <span style={{ fontSize: '18px', fontWeight: 800, color: '#fff' }}>
-                  Broker<span style={{ background: 'linear-gradient(90deg,#2563eb,#06b6d4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>IA</span>
+                <svg width="32" height="32" viewBox="0 0 32 32" style={{ flexShrink: 0 }}>
+                  <rect width="32" height="32" rx="8" fill="#0f172a"/>
+                  <polygon points="16,4 28,26 4,26" fill="none"
+                    stroke="#f59e0b" strokeWidth="2" strokeLinejoin="round"/>
+                  <polyline points="7,22 11,15 15,18 20,9 26,13"
+                    fill="none" stroke="#f59e0b" strokeWidth="2"
+                    strokeLinecap="round" strokeLinejoin="round"/>
+                  <circle cx="20" cy="9" r="2.5" fill="#10b981"/>
+                </svg>
+                <span style={{ fontSize: '20px', fontWeight: 700, color: '#fff', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                  Alvio
                 </span>
               </div>
               <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.45)', lineHeight: '1.7', maxWidth: '260px', marginBottom: '24px' }}>
@@ -319,7 +318,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           {/* Bottom bar */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
             <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.3)', margin: 0 }}>
-              © 2026 BrokerIA. Tous droits réservés. Les performances passées ne garantissent pas les résultats futurs.
+              © 2026 Alvio. Tous droits réservés. Les performances passées ne garantissent pas les résultats futurs.
             </p>
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
               <span style={{
