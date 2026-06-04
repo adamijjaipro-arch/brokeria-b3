@@ -32,7 +32,7 @@ const SignalDetailPage: NextPage = () => {
 
   return (
     <AppLayout>
-      <Head><title>{signal.asset} — Signal — TradingAI</title></Head>
+      <Head><title>{signal.asset} — Signal — Alvio</title></Head>
 
       {/* Back button + header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>

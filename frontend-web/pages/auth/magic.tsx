@@ -47,7 +47,7 @@ const MagicCallbackPage: NextPage = () => {
 
   return (
     <>
-      <Head><title>Connexion en cours… — BrokerIA</title></Head>
+      <Head><title>Connexion en cours… — Alvio</title></Head>
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f9fafb', fontFamily: "'Inter', sans-serif" }}>
         <div style={{ textAlign: 'center', padding: '40px', background: 'white', borderRadius: '20px', boxShadow: '0 4px 24px rgba(0,0,0,0.08)', maxWidth: '400px', width: '100%' }}>
 

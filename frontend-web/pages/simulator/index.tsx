@@ -105,7 +105,7 @@ const SimulatorPage: NextPage = () => {
 
   return (
     <AppLayout title="Simulateur de Trading" subtitle="Testez vos stratégies sans risque avec des données historiques">
-      <Head><title>Simulateur — TradingAI</title></Head>
+      <Head><title>Simulateur — Alvio</title></Head>
 
       <div style={{ display: 'grid', gridTemplateColumns: '340px 1fr', gap: '20px', alignItems: 'start' }}>
         {/* Left: Params */}

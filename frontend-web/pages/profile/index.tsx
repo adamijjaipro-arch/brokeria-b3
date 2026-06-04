@@ -51,7 +51,7 @@ const ProfilePage: NextPage = () => {
 
   return (
     <AppLayout title="Mon Profil" subtitle="Gérez vos informations personnelles et vos préférences">
-      <Head><title>Mon Profil — TradingAI</title></Head>
+      <Head><title>Mon Profil — Alvio</title></Head>
 
       {/* Profile card */}
       <div style={card}>

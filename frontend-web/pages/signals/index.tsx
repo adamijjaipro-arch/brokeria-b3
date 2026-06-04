@@ -110,7 +110,7 @@ const SignalsPage: NextPage = () => {
 
   return (
     <AppLayout title="Signaux de Trading" subtitle={`${filtered.length} signal${filtered.length > 1 ? 's' : ''} actif${filtered.length > 1 ? 's' : ''} détecté${filtered.length > 1 ? 's' : ''} par l'IA`}>
-      <Head><title>Signaux — TradingAI</title></Head>
+      <Head><title>Signaux — Alvio</title></Head>
 
       {/* Header actions */}
       <div style={{ display: 'flex', gap: '10px', marginBottom: '24px', marginTop: '-8px' }}>

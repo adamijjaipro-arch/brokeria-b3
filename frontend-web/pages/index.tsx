@@ -29,7 +29,7 @@ const FEATURES = [
 ];
 
 const TESTIMONIALS = [
-  { name: 'Marc Lefebvre', role: 'Trader Indépendant · Paris', text: 'Depuis que j\'utilise TradingAI, mon win rate est passé de 51% à 74%. Les signaux sont précis et les patterns sont expliqués clairement. Un outil indispensable.', avatar: 'ML', stars: 5 },
+  { name: 'Marc Lefebvre', role: 'Trader Indépendant · Paris', text: 'Depuis que j\'utilise Alvio, mon win rate est passé de 51% à 74%. Les signaux sont précis et les patterns sont expliqués clairement. Un outil indispensable.', avatar: 'ML', stars: 5 },
   { name: 'Sarah Benali', role: 'Gestionnaire de Fonds · Lyon', text: 'L\'analyse IA est bluffante. En 3 mois d\'utilisation Pro, j\'ai optimisé mes entrées et réduit mon drawdown maximum de 28%. Le simulateur DCA est excellent.', avatar: 'SB', stars: 5 },
   { name: 'Thomas Vidal', role: 'Crypto Trader · Bordeaux', text: 'Interface ultra-professionnelle, signaux fiables et support réactif. J\'ai récupéré mon abonnement dès la première semaine. Je recommande à 100%.', avatar: 'TV', stars: 5 },
 ];
@@ -81,7 +81,7 @@ const Home: NextPage = () => {
   return (
     <Layout>
       <Head>
-        <title>TradingAI — Signaux Crypto IA Précis à 95%</title>
+        <title>Alvio — Signaux Crypto IA Précis à 95%</title>
         <meta name="description" content="Plateforme de trading IA : signaux BUY/SELL en temps réel, 15+ patterns, simulateur DCA. Rejoignez 2400+ traders." />
       </Head>
 
@@ -316,7 +316,7 @@ const Home: NextPage = () => {
             <h2 style={{ fontSize: '42px', fontWeight: 800, color: '#0f172a', margin: '0 0 16px', letterSpacing: '-1px' }}>
               Ils nous font <span style={{ background: 'linear-gradient(135deg, #2563eb, #06b6d4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>confiance</span>
             </h2>
-            <p style={{ fontSize: '18px', color: '#64748b', maxWidth: '480px', margin: '0 auto' }}>2 400+ traders utilisent TradingAI pour prendre de meilleures décisions.</p>
+            <p style={{ fontSize: '18px', color: '#64748b', maxWidth: '480px', margin: '0 auto' }}>2 400+ traders utilisent Alvio pour prendre de meilleures décisions.</p>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px' }}>
@@ -407,7 +407,7 @@ const Home: NextPage = () => {
         <div style={{ maxWidth: '720px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '56px' }}>
             <h2 style={{ fontSize: '42px', fontWeight: 800, color: '#0f172a', margin: '0 0 12px', letterSpacing: '-1px' }}>Questions fréquentes</h2>
-            <p style={{ fontSize: '17px', color: '#64748b', margin: 0 }}>Tout ce que vous devez savoir sur TradingAI.</p>
+            <p style={{ fontSize: '17px', color: '#64748b', margin: 0 }}>Tout ce que vous devez savoir sur Alvio.</p>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {FAQS.map((faq, i) => (
@@ -448,7 +448,7 @@ const Home: NextPage = () => {
             <span style={{ background: 'linear-gradient(135deg, #60a5fa, #2563eb, #06b6d4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>l'IA ?</span>
           </h2>
           <p style={{ fontSize: '18px', color: '#94a3b8', margin: '0 0 40px', lineHeight: 1.6 }}>
-            Rejoignez des milliers de traders qui utilisent TradingAI pour prendre de meilleures décisions. Essai gratuit 14 jours.
+            Rejoignez des milliers de traders qui utilisent Alvio pour prendre de meilleures décisions. Essai gratuit 14 jours.
           </p>
           <div style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link href="/register" style={{

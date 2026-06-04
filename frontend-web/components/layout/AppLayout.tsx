@@ -184,19 +184,17 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, title, subtitle }) => {
 
         {/* Logo */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '20px 20px 16px' }}>
-          <div style={{
-            width: '36px', height: '36px', borderRadius: '10px',
-            background: 'linear-gradient(135deg, #2563eb, #06b6d4)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            flexShrink: 0,
-          }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-              <path d="M3 17l4-8 4 4 4-6 4 3" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M3 17h18" stroke="white" strokeWidth="2" strokeLinecap="round" />
-            </svg>
-          </div>
-          <span style={{ fontSize: '18px', fontWeight: 800, color: '#fff', letterSpacing: '-0.3px' }}>
-            Trading<span style={{ background: 'linear-gradient(90deg,#2563eb,#06b6d4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>AI</span>
+          <svg width="32" height="32" viewBox="0 0 32 32" style={{ flexShrink: 0 }}>
+            <rect width="32" height="32" rx="8" fill="#0d1117"/>
+            <polygon points="16,4 28,26 4,26" fill="none"
+              stroke="#f59e0b" strokeWidth="2" strokeLinejoin="round"/>
+            <polyline points="7,22 11,15 15,18 20,9 26,13"
+              fill="none" stroke="#f59e0b" strokeWidth="2"
+              strokeLinecap="round" strokeLinejoin="round"/>
+            <circle cx="20" cy="9" r="2.5" fill="#10b981"/>
+          </svg>
+          <span style={{ fontSize: '20px', fontWeight: 700, color: '#fff', fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.3px' }}>
+            Alvio
           </span>
         </div>
 

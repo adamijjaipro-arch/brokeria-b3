@@ -29,7 +29,7 @@ const ReportsPage: NextPage = () => {
 
   return (
     <AppLayout title="Rapports de Performance" subtitle="Analysez vos résultats mois par mois">
-      <Head><title>Rapports — TradingAI</title></Head>
+      <Head><title>Rapports — Alvio</title></Head>
 
       {/* Filter row */}
       <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: '24px', marginTop: '-8px' }}>

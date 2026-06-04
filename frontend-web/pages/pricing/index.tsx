@@ -124,8 +124,8 @@ const PricingPage: NextPage = () => {
   return (
     <Layout>
       <Head>
-        <title>Tarifs — BrokerIA</title>
-        <meta name="description" content="Plans et tarifs BrokerIA. Essai gratuit 14 jours. Aucune carte bancaire requise." />
+        <title>Tarifs — Alvio</title>
+        <meta name="description" content="Plans et tarifs Alvio. Essai gratuit 14 jours. Aucune carte bancaire requise." />
       </Head>
 
       {/* ══════════════════════════════════════

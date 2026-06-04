@@ -51,7 +51,7 @@ const NewStrategyPage: NextPage = () => {
 
   return (
     <AppLayout>
-      <Head><title>Nouvelle Stratégie — TradingAI</title></Head>
+      <Head><title>Nouvelle Stratégie — Alvio</title></Head>
 
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>

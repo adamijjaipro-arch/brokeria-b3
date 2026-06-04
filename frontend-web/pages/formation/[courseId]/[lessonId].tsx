@@ -102,7 +102,7 @@ const LessonPage: NextPage = () => {
   if (loading) {
     return (
       <AppLayout>
-        <Head><title>Chargement… — TradingAI</title></Head>
+        <Head><title>Chargement… — Alvio</title></Head>
         <style>{`@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}`}</style>
         <div style={{ maxWidth: 800 }}>
           {[40, 500, 100].map((h, i) => (
@@ -132,7 +132,7 @@ const LessonPage: NextPage = () => {
 
   return (
     <AppLayout>
-      <Head><title>{lesson.title} — TradingAI</title></Head>
+      <Head><title>{lesson.title} — Alvio</title></Head>
 
       {/* ── Back ──────────────────────────────────────────────── */}
       <button

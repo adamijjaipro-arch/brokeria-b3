@@ -37,7 +37,7 @@ const Dashboard: NextPage = () => {
       title="Dashboard"
       subtitle="Bienvenue, voici un aperçu de votre activité de trading"
     >
-      <Head><title>Dashboard — TradingAI</title></Head>
+      <Head><title>Dashboard — Alvio</title></Head>
 
       {/* KPI Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '24px' }}>

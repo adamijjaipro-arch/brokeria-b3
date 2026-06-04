@@ -101,7 +101,7 @@ const FormationPage: NextPage = () => {
 
   return (
     <AppLayout title="Formation" subtitle="Progressez du débutant à l'expert en trading">
-      <Head><title>Formation — TradingAI</title></Head>
+      <Head><title>Formation — Alvio</title></Head>
 
       <style>{`@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}`}</style>
 

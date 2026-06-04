@@ -44,7 +44,7 @@ const CourseDetailPage: NextPage = () => {
   if (loading) {
     return (
       <AppLayout>
-        <Head><title>Chargement… — TradingAI</title></Head>
+        <Head><title>Chargement… — Alvio</title></Head>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12, maxWidth: 720 }}>
           {[200, 120, 400].map((h, i) => (
             <div key={i} style={{ height: h, borderRadius: 16, background: 'linear-gradient(90deg,#f3f4f6 25%,#e5e7eb 50%,#f3f4f6 75%)', backgroundSize: '200% 100%', animation: 'shimmer 1.5s infinite' }} />
@@ -72,7 +72,7 @@ const CourseDetailPage: NextPage = () => {
 
   return (
     <AppLayout>
-      <Head><title>{course.title} — TradingAI</title></Head>
+      <Head><title>{course.title} — Alvio</title></Head>
 
       {/* ── Back ──────────────────────────────────────────────── */}
       <button

@@ -4,9 +4,11 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { authApi } from '../api';
+import { useAuthStore } from '../context/authStore';
 
 const RegisterPage: NextPage = () => {
   const router = useRouter();
+  const { setAuth } = useAuthStore();
   const [form, setForm] = useState({ username: '', email: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [showPass, setShowPass] = useState(false);
@@ -19,7 +21,8 @@ const RegisterPage: NextPage = () => {
     setError('');
     try {
       const { data } = await authApi.register(form.email, form.username, form.password);
-      router.push(`/auth/2fa?token=${data.preAuthToken}`);
+      setAuth(data.accessToken, data.user);
+      router.push('/dashboard');
     } catch (err: any) {
       const msg = err?.response?.data?.message;
       setError(Array.isArray(msg) ? msg.join(', ') : msg || 'Erreur lors de la création du compte');
@@ -37,7 +40,7 @@ const RegisterPage: NextPage = () => {
 
   return (
     <>
-      <Head><title>Créer un compte — TradingAI</title></Head>
+      <Head><title>Créer un compte — Alvio</title></Head>
       <div style={{ display: 'flex', height: '100vh', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
 
         {/* Left panel */}
@@ -53,7 +56,7 @@ const RegisterPage: NextPage = () => {
                 <path d="M3 17h18" stroke="white" strokeWidth="2" strokeLinecap="round" />
               </svg>
             </div>
-            <span style={{ color: 'white', fontWeight: 700, fontSize: '20px' }}>TradingAI</span>
+            <span style={{ color: 'white', fontWeight: 700, fontSize: '20px' }}>Alvio</span>
           </div>
 
           <div style={{ position: 'relative' }}>
@@ -156,8 +159,12 @@ const RegisterPage: NextPage = () => {
               </div>
 
               {error && (
-                <div style={{ background: '#fef2f2', borderRadius: '10px', padding: '12px 14px', border: '1px solid #fecaca' }}>
-                  <p style={{ fontSize: '13px', color: '#dc2626', margin: 0, fontWeight: 500 }}>{error}</p>
+                <div style={{ background: '#fef2f2', borderRadius: '10px', padding: '12px 14px', border: '1.5px solid #fecaca', display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+                  <span style={{ fontSize: '18px', flexShrink: 0 }}>⚠️</span>
+                  <div>
+                    <p style={{ fontSize: '13px', color: '#991b1b', margin: 0, fontWeight: 600 }}>Erreur</p>
+                    <p style={{ fontSize: '13px', color: '#dc2626', margin: '4px 0 0', lineHeight: '1.4' }}>{error}</p>
+                  </div>
                 </div>
               )}
 

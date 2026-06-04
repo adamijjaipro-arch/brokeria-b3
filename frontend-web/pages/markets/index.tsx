@@ -161,7 +161,7 @@ const Markets: NextPage = () => {
       subtitle="Données de marché en temps réel · Top 20 par capitalisation"
     >
       <Head>
-        <title>Marchés — TradingAI</title>
+        <title>Marchés — Alvio</title>
       </Head>
 
       <style>{`

@@ -42,7 +42,8 @@ const LoginPage: NextPage = () => {
     setError('');
     try {
       const { data } = await authApi.login(email, password);
-      router.push(`/auth/2fa?token=${data.preAuthToken}`);
+      setAuth(data.accessToken, data.user);
+      router.push('/dashboard');
     } catch (err: any) {
       const msg = err?.response?.data?.message;
       setError(Array.isArray(msg) ? msg.join(', ') : msg || 'Email ou mot de passe incorrect');
@@ -91,7 +92,7 @@ const LoginPage: NextPage = () => {
 
   return (
     <>
-      <Head><title>Connexion — BrokerIA</title></Head>
+      <Head><title>Connexion — Alvio</title></Head>
       <div style={{ display: 'flex', minHeight: '100vh', fontFamily: "'Inter', sans-serif" }}>
 
         {/* ── Panneau gauche — brand ────────────────────────────────────────── */}
@@ -111,7 +112,7 @@ const LoginPage: NextPage = () => {
                 <path d="M3 17h18" stroke="white" strokeWidth="2" strokeLinecap="round" />
               </svg>
             </div>
-            <span style={{ color: 'white', fontWeight: 700, fontSize: '20px' }}>BrokerIA</span>
+            <span style={{ color: 'white', fontWeight: 700, fontSize: '20px' }}>Alvio</span>
           </div>
 
           <div style={{ position: 'relative' }}>
@@ -140,7 +141,7 @@ const LoginPage: NextPage = () => {
 
           <div style={{ position: 'relative', padding: '16px', background: 'rgba(255,255,255,0.04)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.06)' }}>
             <p style={{ fontSize: '13px', color: '#9ca3af', margin: '0 0 8px', fontStyle: 'italic' }}>
-              "BrokerIA a transformé ma façon de trader. +40% de win rate."
+              "Alvio a transformé ma façon de trader. +40% de win rate."
             </p>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 700, color: 'white' }}>ML</div>
@@ -303,8 +304,12 @@ const Spinner = () => (
 );
 
 const ErrorBox = ({ message }: { message: string }) => (
-  <div style={{ background: '#fef2f2', borderRadius: '10px', padding: '12px 14px', border: '1px solid #fecaca' }}>
-    <p style={{ fontSize: '13px', color: '#dc2626', margin: 0, fontWeight: 500 }}>{message}</p>
+  <div style={{ background: '#fef2f2', borderRadius: '10px', padding: '12px 14px', border: '1.5px solid #fecaca', display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+    <span style={{ fontSize: '18px', flexShrink: 0 }}>⚠️</span>
+    <div>
+      <p style={{ fontSize: '13px', color: '#991b1b', margin: 0, fontWeight: 600 }}>Erreur</p>
+      <p style={{ fontSize: '13px', color: '#dc2626', margin: '4px 0 0', lineHeight: '1.4' }}>{message}</p>
+    </div>
   </div>
 );
 

@@ -285,7 +285,7 @@ const CoinDetailPage: NextPage = () => {
   return (
     <AppLayout>
       <Head>
-        <title>{coin ? `${coin.name} (${coin.symbol.toUpperCase()}) — TradingAI` : 'Chargement… — TradingAI'}</title>
+        <title>{coin ? `${coin.name} (${coin.symbol.toUpperCase()}) — Alvio` : 'Chargement… — Alvio'}</title>
       </Head>
 
       <style>{`
