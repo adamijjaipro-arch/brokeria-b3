@@ -4,6 +4,7 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { authApi } from '../../api';
 import { useAuthStore } from '../../context/authStore';
+import PageSEO from '../../components/seo/PageSEO';
 
 const SetupPinPage: NextPage = () => {
   const router = useRouter();
@@ -41,6 +42,7 @@ const SetupPinPage: NextPage = () => {
 
   return (
     <>
+      <PageSEO title="Créer votre PIN — Alvio" description="Créez votre code PIN Alvio pour une sécurité supplémentaire lors de la connexion." noindex={true} />
       <Head><title>Créer votre PIN — Alvio</title></Head>
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f9fafb', fontFamily: "'Inter', sans-serif" }}>
         <div style={{ width: '100%', maxWidth: '420px', padding: '40px', background: 'white', borderRadius: '20px', boxShadow: '0 4px 24px rgba(0,0,0,0.08)' }}>

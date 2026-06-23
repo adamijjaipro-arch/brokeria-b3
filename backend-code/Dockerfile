@@ -1,7 +1,12 @@
 FROM node:18-alpine
+RUN apk add --no-cache openssl python3 py3-pip
+
 WORKDIR /app
 
-# ── Dépendances ───────────────────────────────────────────────────────────────
+# ── Python AI engine dependencies (pattern_detector.py needs only pandas+numpy) ─
+RUN pip3 install --no-cache-dir --break-system-packages pandas numpy
+
+# ── Node.js dependencies ──────────────────────────────────────────────────────
 COPY package*.json ./
 RUN npm install
 

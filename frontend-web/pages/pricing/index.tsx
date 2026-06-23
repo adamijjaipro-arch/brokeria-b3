@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import type { NextPage } from 'next';
-import Head from 'next/head';
 import Link from 'next/link';
 import Layout from '../../components/layout/Layout';
+import PageSEO from '../../components/seo/PageSEO';
+import { SITE_URL, PRICING_JSONLD } from '../../lib/seo';
 
 /* ───────────────────────────────────────────
    DATA
@@ -123,10 +124,13 @@ const PricingPage: NextPage = () => {
 
   return (
     <Layout>
-      <Head>
-        <title>Tarifs — Alvio</title>
-        <meta name="description" content="Plans et tarifs Alvio. Essai gratuit 14 jours. Aucune carte bancaire requise." />
-      </Head>
+      <PageSEO
+        title="Tarifs — Alvio"
+        description="Plans tarifaires Alvio. Choisissez l'abonnement adapté à vos besoins de trading algorithmique. Plan Starter gratuit, Pro à 29€/mois, Elite à 79€/mois."
+        canonical={`${SITE_URL}/pricing`}
+        ogImage={`${SITE_URL}/og-image.png`}
+        jsonLd={PRICING_JSONLD}
+      />
 
       {/* ══════════════════════════════════════
           HERO

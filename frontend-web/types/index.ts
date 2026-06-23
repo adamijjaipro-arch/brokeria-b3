@@ -50,11 +50,13 @@ export interface CreateSignalPayload {
 // ─── Simulator ────────────────────────────────────────────────────────────────
 
 export interface DCAParams {
+  asset: string;
   initialAmount: number;
   monthlyInvestment: number;
   months: number;
   annualReturn?: number;
   volatility?: number;
+  mode?: 'monte_carlo' | 'fixed';
 }
 
 export interface DCAMonthlyData {
@@ -69,6 +71,29 @@ export interface DCAResult {
   totalGains: number;
   roi: number;
   monthlyData: DCAMonthlyData[];
+}
+
+export interface SimulationRecord {
+  id:          string;
+  asset:       string;
+  params:      string;       // JSON: { initialAmount, monthlyInvestment, months, annualReturn, volatility, mode }
+  result:      string;       // JSON: { totalInvested, finalBalance, totalGains, roi }
+  monthlyData: string | null; // JSON array — persisted for exact replay
+  createdAt:   string;
+}
+
+// ─── Portfolio ────────────────────────────────────────────────────────────────
+
+export interface PortfolioHistory {
+  months: string[];
+  values: number[];
+}
+
+export interface PortfolioStats {
+  capitalTotal: number | null;
+  capitalGrowthPercent: number | null;
+  winRate: number | null;
+  performance: number | null;
 }
 
 // ─── API ──────────────────────────────────────────────────────────────────────

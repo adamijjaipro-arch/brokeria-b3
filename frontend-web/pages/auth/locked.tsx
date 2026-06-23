@@ -1,12 +1,14 @@
 import type { NextPage } from 'next';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
+import PageSEO from '../../components/seo/PageSEO';
 
 const LockedPage: NextPage = () => {
   const router = useRouter();
 
   return (
     <>
+      <PageSEO title="Compte bloqué — Alvio" description="Votre compte Alvio est temporairement verrouillé. Contactez le support pour le débloquer." noindex={true} />
       <Head><title>Compte bloqué — Alvio</title></Head>
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f9fafb', fontFamily: "'Inter', sans-serif" }}>
         <div style={{ width: '100%', maxWidth: '420px', padding: '40px', background: 'white', borderRadius: '20px', boxShadow: '0 4px 24px rgba(0,0,0,0.08)', textAlign: 'center' }}>

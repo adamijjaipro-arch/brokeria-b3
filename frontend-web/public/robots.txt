@@ -1,0 +1,24 @@
+User-agent: *
+Allow: /
+Allow: /markets/
+Allow: /formation/
+Allow: /pricing/
+Allow: /login
+Allow: /register
+
+# Private — user-specific content
+Disallow: /dashboard/
+Disallow: /signals/
+Disallow: /profile/
+Disallow: /reports/
+Disallow: /simulator/
+Disallow: /strategies/
+Disallow: /auth/
+Disallow: /api/
+
+# Next.js internals
+Disallow: /_next/
+
+Crawl-delay: 1
+
+Sitemap: https://alvio.io/sitemap.xml

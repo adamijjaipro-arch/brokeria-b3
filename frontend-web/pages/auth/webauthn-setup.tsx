@@ -11,6 +11,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 import { webAuthnApi } from '@/api';
+import PageSEO from '@/components/seo/PageSEO';
 
 type Step = 'idle' | 'loading' | 'success' | 'error';
 
@@ -51,6 +52,11 @@ export default function WebAuthnSetupPage() {
 
   return (
     <div className="min-h-screen bg-gray-950 flex items-center justify-center px-4">
+      <PageSEO
+        title="Configuration WebAuthn — Alvio"
+        description="Enregistrez votre clé de sécurité ou empreinte digitale WebAuthn pour une authentification sans mot de passe sur Alvio."
+        noindex={true}
+      />
       <div className="w-full max-w-md bg-gray-900 rounded-2xl shadow-xl p-8 border border-gray-800">
 
         <div className="text-center mb-8">

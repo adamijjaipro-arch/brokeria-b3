@@ -1,6 +1,9 @@
-import { IsNumber, Min, Max } from 'class-validator';
+import { IsNumber, IsString, IsOptional, IsIn, Min, Max } from 'class-validator';
 
 export class DCASimulatorDto {
+  @IsString()
+  asset: string;
+
   @IsNumber()
   @Min(0)
   initialAmount: number;
@@ -22,5 +25,9 @@ export class DCASimulatorDto {
   @IsNumber()
   @Min(0)
   @Max(1)
-  volatility: number = 0.15;
+  volatility: number = 0.35;
+
+  @IsOptional()
+  @IsIn(['monte_carlo', 'fixed'])
+  mode?: 'monte_carlo' | 'fixed';
 }

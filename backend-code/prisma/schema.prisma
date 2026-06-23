@@ -46,6 +46,40 @@ model User {
   reports             Report[]
   webAuthnCredentials WebAuthnCredential[]
   progress            UserProgress[]
+  portfolioSnapshots  PortfolioSnapshot[]
+  simulationResults   SimulationResult[]
+}
+
+// ─── Simulator ────────────────────────────────────────────────────────────────
+// Chaque simulation DCA lancée par un utilisateur est persistée ici.
+// params / result sont stockés en JSON (String) pour éviter un modèle trop large.
+model SimulationResult {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  asset       String
+  params      String   // JSON: { initialAmount, monthlyInvestment, months, annualReturn, volatility, mode }
+  result      String   // JSON: { totalInvested, finalBalance, totalGains, roi }
+  monthlyData String?  // JSON array of { month, balance, invested } — persisted for exact replay
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+}
+
+// ─── Portfolio ────────────────────────────────────────────────────────────────
+// Un snapshot mensuel du capital de l'utilisateur.
+// Alimenté manuellement ou via un futur module de tracking des trades.
+model PortfolioSnapshot {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  capital   Float
+  month     Int      // 1-12
+  year      Int
+  createdAt DateTime @default(now())
+
+  @@unique([userId, month, year])
+  @@index([userId])
 }
 
 // ─── WebAuthn / FIDO2 credentials ────────────────────────────────────────────
@@ -70,23 +104,37 @@ model WebAuthnCredential {
 // Alternative : garder ce modèle pour un audit trail des sessions actives.
 
 model Signal {
-  id                String   @id @default(cuid())
+  id                String    @id @default(cuid())
   userId            String
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Relation vers la stratégie source (nullable pour compatibilité ascendante)
+  strategyId        String?
+
   asset             String
-  direction         String   // BUY | SELL | HOLD
+  timeframe         String?   // 1h | 4h | 1d — nullable pour les anciens enregistrements
+  direction         String    // BUY | SELL | HOLD
+  status            String    @default("OPEN")  // OPEN | CLOSED
+
   entry_price       Float
   stop_loss         Float
   take_profit       Float
+  exit_price        Float?    // renseigné à la clôture (EXIT_SIGNAL)
   confidence        Float
   risk_reward_ratio Float?
-  patterns          String?  // JSON array
-  indicators        String?  // JSON object
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+
+  patterns          String?   // JSON array
+  indicators        String?   // JSON object — détail indicateurs + conditions
+
+  closedAt          DateTime? // renseigné quand status passe à CLOSED
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 
   @@index([userId])
   @@index([asset])
+  @@index([strategyId])
+  // Index composite pour la vérification de doublon (O(1) au lieu de scan full-table)
+  @@index([strategyId, asset, direction, status])
 }
 
 model Strategy {

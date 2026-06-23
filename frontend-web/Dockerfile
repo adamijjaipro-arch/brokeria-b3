@@ -1,19 +1,19 @@
-FROM node:18-alpine AS builder
+FROM node:22-alpine AS builder
 
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm ci
+RUN npm ci --legacy-peer-deps
 
 COPY . .
-RUN npm run build
+RUN npm run build -- --no-lint
 
-FROM node:18-alpine
+FROM node:22-alpine
 
 WORKDIR /app
 
 COPY --from=builder /app/package*.json ./
-RUN npm ci --only=production
+RUN npm ci --only=production --legacy-peer-deps
 
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public

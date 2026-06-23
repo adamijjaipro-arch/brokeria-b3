@@ -3,6 +3,7 @@ import type { NextPage } from 'next';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { authApi } from '../../api';
+import PageSEO from '../../components/seo/PageSEO';
 
 const TwoFAPage: NextPage = () => {
   const router = useRouter();
@@ -51,6 +52,7 @@ const TwoFAPage: NextPage = () => {
 
   return (
     <>
+      <PageSEO title="Vérification 2FA — Alvio" description="Authentification à deux facteurs Alvio. Saisissez votre code OTP pour accéder à votre compte." noindex={true} />
       <Head><title>Vérification — Alvio</title></Head>
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f9fafb', fontFamily: "'Inter', sans-serif" }}>
         <div style={{ width: '100%', maxWidth: '420px', padding: '40px', background: 'white', borderRadius: '20px', boxShadow: '0 4px 24px rgba(0,0,0,0.08)' }}>

@@ -290,25 +290,25 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, title, subtitle }) => {
       </aside>
 
       {/* ══════════════ MAIN ══════════════ */}
-      <div style={{ display: 'flex', flexDirection: 'column', flex: 1, height: '100vh', marginLeft: '320px', overflow: 'hidden', background: '#f0f2f5' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', flex: 1, height: '100vh', marginLeft: '320px', overflow: 'hidden', background: '#0A0A0A' }}>
 
         {/* Topbar */}
         <header style={{
           flexShrink: 0, display: 'flex', alignItems: 'center', gap: '12px',
           padding: '0 24px', height: '64px',
-          background: '#fff', borderBottom: '1px solid #e5e7eb',
+          background: '#111111', borderBottom: '1px solid #1F1F1F',
         }}>
           <div style={{ position: 'relative', flex: 1, maxWidth: '320px' }}>
-            <svg style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#555555' }} width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
             <input
               type="text"
               placeholder="Rechercher..."
               style={{
-                width: '100%', padding: '8px 12px 8px 36px', border: '1px solid #e5e7eb',
-                borderRadius: '10px', fontSize: '14px', color: '#111827',
-                background: '#f9fafb', outline: 'none', boxSizing: 'border-box',
+                width: '100%', padding: '8px 12px 8px 36px', border: '1px solid #1F1F1F',
+                borderRadius: '10px', fontSize: '14px', color: '#FFFFFF',
+                background: '#1A1A1A', outline: 'none', boxSizing: 'border-box',
               }}
             />
           </div>
@@ -318,19 +318,19 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, title, subtitle }) => {
             {/* Notifications */}
             <button style={{
               position: 'relative', padding: '8px', background: 'transparent',
-              border: 'none', borderRadius: '10px', cursor: 'pointer', color: '#6b7280',
+              border: 'none', borderRadius: '10px', cursor: 'pointer', color: '#888888',
             }}>
               <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
               </svg>
-              <span style={{ position: 'absolute', top: '6px', right: '6px', width: '8px', height: '8px', background: '#ef4444', borderRadius: '50%', border: '2px solid #fff' }} />
+              <span style={{ position: 'absolute', top: '6px', right: '6px', width: '8px', height: '8px', background: '#ef4444', borderRadius: '50%', border: '2px solid #111111' }} />
             </button>
 
             {/* User chip */}
             <div style={{
               display: 'flex', alignItems: 'center', gap: '8px',
-              padding: '6px 12px', background: '#f9fafb',
-              border: '1px solid #e5e7eb', borderRadius: '10px', cursor: 'pointer',
+              padding: '6px 12px', background: '#1A1A1A',
+              border: '1px solid #2A2A2A', borderRadius: '10px', cursor: 'pointer',
             }}>
               <div style={{
                 width: '28px', height: '28px', borderRadius: '50%',
@@ -338,8 +338,8 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, title, subtitle }) => {
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 color: '#fff', fontSize: '11px', fontWeight: 700,
               }}>{avatarLetters}</div>
-              <span style={{ fontSize: '13px', fontWeight: 600, color: '#111827' }}>{displayName}</span>
-              <svg width="12" height="12" fill="none" stroke="#9ca3af" viewBox="0 0 24 24">
+              <span style={{ fontSize: '13px', fontWeight: 600, color: '#FFFFFF' }}>{displayName}</span>
+              <svg width="12" height="12" fill="none" stroke="#555555" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </div>
@@ -350,8 +350,8 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, title, subtitle }) => {
         <main style={{ flex: 1, padding: '24px', overflowY: 'auto' }}>
           {(title || subtitle) && (
             <div style={{ marginBottom: '20px' }}>
-              {title && <h1 style={{ margin: 0, fontSize: '28px', fontWeight: 700, color: '#111827', lineHeight: 1.2 }}>{title}</h1>}
-              {subtitle && <p style={{ margin: '4px 0 0', fontSize: '14px', color: '#6b7280' }}>{subtitle}</p>}
+              {title && <h1 style={{ margin: 0, fontSize: '28px', fontWeight: 700, color: '#FFFFFF', lineHeight: 1.2 }}>{title}</h1>}
+              {subtitle && <p style={{ margin: '4px 0 0', fontSize: '14px', color: '#888888' }}>{subtitle}</p>}
             </div>
           )}
           {children}

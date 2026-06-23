@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, UseGuards, Request } from '@nestjs/common';
 import { SimulatorService } from './simulator.service';
 import { JwtGuard } from '../auth/jwt.guard';
 import { DCASimulatorDto } from './dto/dca-simulator.dto';
@@ -6,10 +6,15 @@ import { DCASimulatorDto } from './dto/dca-simulator.dto';
 @Controller('simulator')
 @UseGuards(JwtGuard)
 export class SimulatorController {
-  constructor(private simulatorService: SimulatorService) {}
+  constructor(private readonly simulatorService: SimulatorService) {}
 
   @Post('dca')
-  async simulateDCA(@Body() dcaDto: DCASimulatorDto) {
-    return this.simulatorService.simulateDCA(dcaDto);
+  simulateDCA(@Body() dto: DCASimulatorDto, @Request() req: any) {
+    return this.simulatorService.simulateDCA(req.user.id, dto);
+  }
+
+  @Get('history')
+  getHistory(@Request() req: any) {
+    return this.simulatorService.getHistory(req.user.id);
   }
 }

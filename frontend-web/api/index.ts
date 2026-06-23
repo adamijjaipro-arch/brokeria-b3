@@ -10,7 +10,7 @@
  */
 import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import { useAuthStore } from '@/context/authStore';
-export type { Signal, SignalStats, CreateSignalPayload, DCAParams, DCAResult, DCAMonthlyData } from '@/types';
+export type { Signal, SignalStats, CreateSignalPayload, DCAParams, DCAResult, DCAMonthlyData, PortfolioHistory, PortfolioStats, SimulationRecord } from '@/types';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -195,9 +195,20 @@ export const signalsApi = {
   create: (signal: CreateSignalPayload) => api.post<Signal>('/signals', signal),
 };
 
+// ─── Portfolio API ────────────────────────────────────────────────────────────
+import type { PortfolioHistory, PortfolioStats } from '@/types';
+
+export const portfolioApi = {
+  getHistory: () => api.get<PortfolioHistory>('/portfolio/history'),
+  getStats:   () => api.get<PortfolioStats>('/portfolio/stats'),
+};
+
 // ─── Simulator API ────────────────────────────────────────────────────────────
+import type { SimulationRecord } from '@/types';
+
 export const simulatorApi = {
-  runDCA: (params: DCAParams) => api.post<DCAResult>('/simulator/dca', params),
+  runDCA:     (params: DCAParams)  => api.post<DCAResult>('/simulator/dca', params),
+  getHistory: ()                   => api.get<SimulationRecord[]>('/simulator/history'),
 };
 
 // ─── TOTP MFA API ─────────────────────────────────────────────────────────────
@@ -250,3 +261,65 @@ export const formationApi = {
 };
 
 export default api;
+
+// ── Markets API ───────────────────────────────────────────────────────────────
+// All calls go through the NestJS backend (/markets/*) which caches in Redis
+// and adds the CoinGecko API key — no direct CoinGecko calls from the frontend.
+
+export interface CoinMarketData {
+  id:                          string;
+  symbol:                      string;
+  name:                        string;
+  image:                       string;
+  current_price:               number;
+  price_change_percentage_24h: number;
+  total_volume:                number;
+  market_cap:                  number;
+  sparkline_in_7d:             { price: number[] };
+}
+
+export interface CoinDetailData {
+  id:              string;
+  name:            string;
+  symbol:          string;
+  market_cap_rank?: number;
+  image:           { large: string; small: string };
+  description?:    { en?: string };
+  links?:          { homepage?: string[]; subreddit_url?: string };
+  market_data: {
+    current_price:               { usd: number };
+    price_change_percentage_24h:  number;
+    high_24h:                    { usd: number };
+    low_24h:                     { usd: number };
+    total_volume:                { usd: number };
+    market_cap:                  { usd: number };
+    circulating_supply:           number;
+    ath:                         { usd: number };
+    ath_change_percentage:       { usd: number };
+  };
+}
+
+export type ChartMode = 'candle' | 'line';
+
+export interface OhlcApiResponse {
+  mode: ChartMode;
+  /** candle: [ts_ms, open, high, low, close][]  ·  line: [ts_ms, price][] */
+  data: number[][];
+}
+
+export const marketsApi = {
+  /** Top 20 coins by market cap — cached 60 s */
+  getTop: () =>
+    api.get<CoinMarketData[]>('/markets/top'),
+
+  /** Full coin detail (price, 24h change, high/low, volume, ATH) — cached 30 s */
+  getDetail: (coinId: string) =>
+    api.get<CoinDetailData>(`/markets/detail/${coinId}`),
+
+  /**
+   * OHLCV data — tries /ohlc (candle), falls back to /market_chart (line).
+   * TTL: 60 s (days=1) · 3 min (days=7) · 10 min (days=30) · 30 min (days≥90)
+   */
+  getOhlcv: (coinId: string, days: number) =>
+    api.get<OhlcApiResponse>(`/markets/ohlcv/${coinId}`, { params: { days } }),
+};

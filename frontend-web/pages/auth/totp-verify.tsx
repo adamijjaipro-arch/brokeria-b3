@@ -5,6 +5,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 import { totpApi } from '@/api';
+import PageSEO from '@/components/seo/PageSEO';
 
 export default function TotpVerifyPage() {
   const router = useRouter();
@@ -33,6 +34,11 @@ export default function TotpVerifyPage() {
 
   return (
     <div className="min-h-screen bg-gray-950 flex items-center justify-center px-4">
+      <PageSEO
+        title="Vérification TOTP — Alvio"
+        description="Vérifiez votre code TOTP pour accéder à votre compte Alvio."
+        noindex={true}
+      />
       <div className="w-full max-w-sm bg-gray-900 rounded-2xl shadow-xl p-8 border border-gray-800">
 
         <div className="text-center mb-8">

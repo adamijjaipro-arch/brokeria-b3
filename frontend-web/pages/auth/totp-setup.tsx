@@ -11,6 +11,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
 import { totpApi } from '@/api';
+import PageSEO from '@/components/seo/PageSEO';
 
 type Step = 'loading' | 'scan' | 'confirm' | 'success' | 'error';
 
@@ -63,6 +64,11 @@ export default function TotpSetupPage() {
   // ── Render ──────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-gray-950 flex items-center justify-center px-4">
+      <PageSEO
+        title="Configuration TOTP — Alvio"
+        description="Activez l'authentification à deux facteurs TOTP sur votre compte Alvio pour une sécurité renforcée."
+        noindex={true}
+      />
       <div className="w-full max-w-md bg-gray-900 rounded-2xl shadow-xl p-8 border border-gray-800">
 
         {/* Header */}

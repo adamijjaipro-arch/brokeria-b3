@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import type { NextPage } from 'next';
-import Head from 'next/head';
 import Link from 'next/link';
 import Layout from '../components/layout/Layout';
+import PageSEO from '../components/seo/PageSEO';
+import { SITE_URL, FAQ_JSONLD, WEBSITE_JSONLD } from '../lib/seo';
 
 /* ═══════════════════════════════
    ALVIO — Landing Page
@@ -80,10 +81,13 @@ const Home: NextPage = () => {
 
   return (
     <Layout>
-      <Head>
-        <title>Alvio — AI-powered trading platform</title>
-        <meta name="description" content="Alvio : signaux BUY/SELL crypto en temps réel, 15+ patterns chartistes détectés par IA, simulateur DCA. Rejoignez 2 400+ traders." />
-      </Head>
+      <PageSEO
+        title="Alvio — Trading Algorithmique Intelligent"
+        description="Alvio — Plateforme de trading algorithmique. Signaux IA en temps réel, analyse des marchés crypto, backtesting et simulation de portefeuille. Rejoignez 2 400+ traders."
+        canonical={SITE_URL}
+        ogImage={`${SITE_URL}/og-image.png`}
+        jsonLd={[WEBSITE_JSONLD, FAQ_JSONLD]}
+      />
 
       {/* ══════════════════════════════════════
           HERO — Dark premium

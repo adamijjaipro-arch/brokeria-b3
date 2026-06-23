@@ -78,13 +78,14 @@ services:
       SYSLOG_PORT:           514
       METRICS_ALLOWED_IPS:   ${METRICS_ALLOWED_IPS:-127.0.0.1,::1,::ffff:127.0.0.1,172.16.0.0/12}
       APP_NAME:              brokeria
+      ANTHROPIC_API_KEY:     ${ANTHROPIC_API_KEY}
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
     volumes:
-      - ./ai-module:/app/ai-module
+      - ./backend-code/ai-module:/app/ai-module
 
   # ── Frontend Next.js ─────────────────────────────────────────────────────────
   frontend:

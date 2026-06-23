@@ -157,7 +157,7 @@ export class AuthService {
   // 1. EMAIL / MOT DE PASSE
   // ═══════════════════════════════════════════════════════════════════════════
 
-  async register(dto: RegisterDto, ip?: string): Promise<{ preAuthToken: string }> {
+  async register(dto: RegisterDto, res: Response, ip?: string): Promise<{ accessToken: string; user: AuthUser }> {
     const passwordHash = await bcrypt.hash(dto.password, 12);
     let user: AuthUser;
     try {
@@ -166,15 +166,25 @@ export class AuthService {
       });
       user = { id: created.id, email: created.email, username: created.username };
     } catch (e: any) {
-      if (e?.code === 'P2002') throw new ConflictException('Email ou nom d\'utilisateur déjà utilisé');
+      if (e?.code === 'P2002') {
+        // Vérifier quel champ cause le conflit
+        if (e.meta?.target?.includes('email')) {
+          throw new ConflictException(`Cet email (${dto.email}) est déjà utilisé. Veuillez en utiliser un autre.`);
+        }
+        if (e.meta?.target?.includes('username')) {
+          throw new ConflictException(`Ce nom d'utilisateur (${dto.username}) existe déjà. Veuillez en choisir un autre.`);
+        }
+        throw new ConflictException('Cet email ou ce nom d\'utilisateur existe déjà. Veuillez en utiliser d\'autres.');
+      }
       throw e;
     }
     await this.logging.authSuccess(user.id, 'password', ip);
-    const preAuthToken = await this.generateAndSendOTP(user.id, user.email);
-    return { preAuthToken };
+    // 2FA DÉSACTIVÉ : retourner directement les tokens
+    const { accessToken } = await this.issueTokens(user.id, user.email, res, ip);
+    return { accessToken, user };
   }
 
-  async login(dto: LoginDto, ip?: string): Promise<{ preAuthToken: string }> {
+  async login(dto: LoginDto, res: Response, ip?: string): Promise<{ accessToken: string; user: AuthUser }> {
     const dbUser = await this.prisma.user.findUnique({ where: { email: dto.email } });
     if (!dbUser?.passwordHash) {
       await this.logging.authFailure(null, 'password', ip, undefined, `Email inconnu: ${dto.email}`);
@@ -191,8 +201,11 @@ export class AuthService {
 
     await this.clearFailures(dbUser.id, 'password');
     await this.logging.authSuccess(dbUser.id, 'password', ip);
-    const preAuthToken = await this.generateAndSendOTP(dbUser.id, dbUser.email);
-    return { preAuthToken };
+    
+    // 2FA DÉSACTIVÉ : retourner directement les tokens
+    const user: AuthUser = { id: dbUser.id, email: dbUser.email, username: dbUser.username };
+    const { accessToken } = await this.issueTokens(dbUser.id, dbUser.email, res, ip);
+    return { accessToken, user };
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -208,7 +221,7 @@ export class AuthService {
     this.logger.log(`Magic link envoyé à ${userEmail}`);
   }
 
-  async verifyMagicLink(token: string, ip?: string): Promise<{ preAuthToken: string; requiresPassword?: boolean }> {
+  async verifyMagicLink(token: string, ip?: string): Promise<{ accessToken: string; user: AuthUser }> {
     const userEmail = await this.redis.get(magicKey(token));
     if (!userEmail) throw new UnauthorizedException('Lien expiré ou invalide');
     await this.redis.del(magicKey(token));
@@ -223,25 +236,18 @@ export class AuthService {
 
     await this.logging.authSuccess(dbUser.id, 'magic_link', ip);
 
-    if (!dbUser.passwordHash) {
-      const preAuthToken = crypto.randomUUID();
-      await this.redis.set(
-        preAuthKey(preAuthToken),
-        JSON.stringify({ userId: dbUser.id, email: dbUser.email, otp: null }),
-        PREAUTH_TTL,
-      );
-      return { preAuthToken, requiresPassword: true };
-    }
-
-    const preAuthToken = await this.generateAndSendOTP(dbUser.id, dbUser.email);
-    return { preAuthToken };
+    // CONNEXION DIRECTE SANS OTP : retourner les tokens immédiatement
+    const user: AuthUser = { id: dbUser.id, email: dbUser.email, username: dbUser.username };
+    const res = {} as Response; // Dummy response for issueTokens
+    const { accessToken } = await this.issueTokens(dbUser.id, dbUser.email, res, ip);
+    return { accessToken, user };
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
   // 3. GITHUB OAUTH
   // ═══════════════════════════════════════════════════════════════════════════
 
-  async handleGithubCallback(profile: GithubProfile, ip?: string): Promise<string> {
+  async handleGithubCallback(profile: GithubProfile, ip?: string, res?: Response): Promise<string | { accessToken: string; user: AuthUser }> {
     let dbUser = await this.prisma.user.findFirst({ where: { githubId: profile.githubId } });
 
     if (!dbUser && profile.email) {
@@ -263,7 +269,21 @@ export class AuthService {
     if (dbUser.email.endsWith('@no-email.local')) return `no-email:${dbUser.id}`;
 
     await this.logging.authSuccess(dbUser.id, 'github', ip);
-    const preAuthToken = await this.generateAndSendOTP(dbUser.id, dbUser.email);
+    
+    // CONNEXION DIRECTE SANS OTP : retourner les tokens immédiatement
+    if (res) {
+      const user: AuthUser = { id: dbUser.id, email: dbUser.email, username: dbUser.username };
+      const { accessToken } = await this.issueTokens(dbUser.id, dbUser.email, res, ip);
+      return { accessToken, user };
+    }
+    
+    // Fallback pour backward compatibility
+    const preAuthToken = crypto.randomUUID();
+    await this.redis.set(
+      preAuthKey(preAuthToken),
+      JSON.stringify({ userId: dbUser.id, email: dbUser.email }),
+      PREAUTH_TTL,
+    );
     return preAuthToken;
   }
 
@@ -354,7 +374,7 @@ export class AuthService {
   // 7. SET PASSWORD (utilisateurs magic link)
   // ═══════════════════════════════════════════════════════════════════════════
 
-  async setPassword(preAuthToken: string, password: string, ip?: string): Promise<{ preAuthToken: string }> {
+  async setPassword(preAuthToken: string, password: string, ip?: string, res?: Response): Promise<{ accessToken?: string; user?: AuthUser; preAuthToken?: string }> {
     const stored = await this.redis.get(preAuthKey(preAuthToken));
     if (!stored) throw new UnauthorizedException('Session expirée');
 
@@ -363,7 +383,22 @@ export class AuthService {
     await this.prisma.user.update({ where: { id: parsed.userId }, data: { passwordHash } });
     await this.redis.del(preAuthKey(preAuthToken));
 
-    const newPreAuthToken = await this.generateAndSendOTP(parsed.userId, parsed.email);
+    // CONNEXION DIRECTE SANS OTP : retourner les tokens immédiatement
+    if (res) {
+      const user: AuthUser = { id: parsed.userId, email: parsed.email, username: '' };
+      const dbUser = await this.prisma.user.findUnique({ where: { id: parsed.userId } });
+      if (dbUser) user.username = dbUser.username;
+      const { accessToken } = await this.issueTokens(parsed.userId, parsed.email, res, ip);
+      return { accessToken, user };
+    }
+    
+    // Fallback pour backward compatibility
+    const newPreAuthToken = crypto.randomUUID();
+    await this.redis.set(
+      preAuthKey(newPreAuthToken),
+      JSON.stringify({ userId: parsed.userId, email: parsed.email }),
+      PREAUTH_TTL,
+    );
     return { preAuthToken: newPreAuthToken };
   }
 
@@ -413,6 +448,38 @@ export class AuthService {
       where:  { id: userId },
       select: { id: true, email: true, username: true, githubId: true, trading_preference: true, createdAt: true },
     });
+  }
+
+  /**
+   * MODE DÉVELOPPEMENT SEULEMENT - Connexion directe sans authentification
+   * Crée ou récupère l'utilisateur et émet les tokens JWT
+   */
+  async devLogin(email: string, res: Response, ip: string) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new UnauthorizedException('Dev mode not available in production');
+    }
+
+    // Créer ou récupérer l'utilisateur
+    let user = await this.prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      user = await this.prisma.user.create({
+        data: {
+          email,
+          username: email.split('@')[0],
+          passwordHash: '', // Pas de password en dev
+        },
+      });
+    }
+
+    const { accessToken } = await this.issueTokens(user.id, user.email, res, ip);
+    return {
+      accessToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+      },
+    };
   }
 
   // ═══════════════════════════════════════════════════════════════════════════

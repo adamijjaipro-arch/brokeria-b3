@@ -1,12 +1,17 @@
 import { Controller, Get, Post, Body, UseGuards, Request } from '@nestjs/common';
 import { SignalsService } from './signals.service';
+import { SignalSchedulerService } from './signal-scheduler.service';
 import { JwtGuard } from '../auth/jwt.guard';
 import { CreateSignalDto } from './dto/create-signal.dto';
+import { GenerateSignalDto } from './dto/generate-signal.dto';
 
 @Controller('signals')
 @UseGuards(JwtGuard)
 export class SignalsController {
-  constructor(private signalsService: SignalsService) {}
+  constructor(
+    private signalsService: SignalsService,
+    private scheduler: SignalSchedulerService,
+  ) {}
 
   @Get()
   async getSignals(@Request() req: any) {
@@ -29,5 +34,30 @@ export class SignalsController {
   @Get('statistics')
   async getSignalsStatistics(@Request() req: any) {
     return this.signalsService.getSignalsStatistics(req.user.id);
+  }
+
+  /**
+   * POST /signals/generate
+   * Body: { strategyId, asset, timeframe, mockResult? }
+   *
+   * Runs pattern detection (Module 3) then maps + persists a Signal if applicable.
+   * mockResult bypasses CoinGecko and injects a PatternDetectionResult directly (tests).
+   */
+  @Post('generate')
+  async generateSignal(
+    @Body() dto: GenerateSignalDto,
+    @Request() req: any,
+  ) {
+    return this.signalsService.generateSignal(req.user.id, dto);
+  }
+
+  /**
+   * POST /signals/scan-now
+   * Triggers an immediate scheduler scan of all active strategies.
+   * Runs the same logic as the periodic cron, returns per-strategy results.
+   */
+  @Post('scan-now')
+  async scanNow() {
+    return this.scheduler.runScan();
   }
 }

@@ -5,34 +5,35 @@ import { useRouter } from 'next/router';
 import AppLayout from '../../../components/layout/AppLayout';
 import { formationApi } from '../../../api';
 import type { LessonDetail } from '../../../types/formation';
+import PageSEO from '../../../components/seo/PageSEO';
+import { SITE_URL } from '../../../lib/seo';
 
 // ── Markdown renderer ─────────────────────────────────────────────────────────
-// Rendu minimal de markdown sans dépendance externe
 
 function renderMarkdown(md: string): string {
   return md
     // Code blocks (triple backtick)
     .replace(/```[\w]*\n?([\s\S]*?)```/g, '<pre style="background:#1e293b;color:#e2e8f0;padding:16px;border-radius:10px;overflow-x:auto;font-size:13px;line-height:1.6;margin:16px 0"><code>$1</code></pre>')
     // Inline code
-    .replace(/`([^`]+)`/g, '<code style="background:#f1f5f9;color:#0f172a;padding:2px 6px;border-radius:4px;font-size:0.9em">$1</code>')
+    .replace(/`([^`]+)`/g, '<code style="background:#1A1A1A;color:#CCCCCC;padding:2px 6px;border-radius:4px;font-size:0.9em">$1</code>')
     // H3
-    .replace(/^### (.+)$/gm, '<h3 style="font-size:17px;font-weight:700;color:#111827;margin:20px 0 8px;font-family:\'Plus Jakarta Sans\',sans-serif">$1</h3>')
+    .replace(/^### (.+)$/gm, '<h3 style="font-size:17px;font-weight:700;color:#FFFFFF;margin:20px 0 8px;font-family:\'Plus Jakarta Sans\',sans-serif">$1</h3>')
     // H2
-    .replace(/^## (.+)$/gm, '<h2 style="font-size:20px;font-weight:800;color:#111827;margin:28px 0 10px;font-family:\'Plus Jakarta Sans\',sans-serif">$1</h2>')
+    .replace(/^## (.+)$/gm, '<h2 style="font-size:20px;font-weight:800;color:#FFFFFF;margin:28px 0 10px;font-family:\'Plus Jakarta Sans\',sans-serif">$1</h2>')
     // H1
-    .replace(/^# (.+)$/gm, '<h1 style="font-size:24px;font-weight:800;color:#111827;margin:0 0 16px;font-family:\'Plus Jakarta Sans\',sans-serif">$1</h1>')
+    .replace(/^# (.+)$/gm, '<h1 style="font-size:24px;font-weight:800;color:#FFFFFF;margin:0 0 16px;font-family:\'Plus Jakarta Sans\',sans-serif">$1</h1>')
     // Bold
     .replace(/\*\*(.+?)\*\*/g, '<strong style="font-weight:700">$1</strong>')
     // Italic
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
     // Tables (simple)
     .replace(/\|(.+)\|\n\|[-| ]+\|\n((?:\|.+\|\n?)+)/g, (_, header, rows) => {
-      const ths = header.split('|').filter(Boolean).map((h: string) => `<th style="padding:8px 14px;text-align:left;font-size:12px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;border-bottom:2px solid #f3f4f6">${h.trim()}</th>`).join('');
+      const ths = header.split('|').filter(Boolean).map((h: string) => `<th style="padding:8px 14px;text-align:left;font-size:12px;font-weight:700;color:#555555;text-transform:uppercase;letter-spacing:.05em;border-bottom:2px solid #1A1A1A">${h.trim()}</th>`).join('');
       const trs = rows.trim().split('\n').map((row: string) => {
-        const tds = row.split('|').filter(Boolean).map((c: string) => `<td style="padding:10px 14px;font-size:14px;color:#374151;border-bottom:1px solid #f9fafb">${c.trim()}</td>`).join('');
+        const tds = row.split('|').filter(Boolean).map((c: string) => `<td style="padding:10px 14px;font-size:14px;color:#CCCCCC;border-bottom:1px solid #141414">${c.trim()}</td>`).join('');
         return `<tr>${tds}</tr>`;
       }).join('');
-      return `<div style="overflow-x:auto;margin:16px 0"><table style="width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.07)"><thead><tr style="background:#fafafa">${ths}</tr></thead><tbody>${trs}</tbody></table></div>`;
+      return `<div style="overflow-x:auto;margin:16px 0"><table style="width:100%;border-collapse:collapse;background:#111111;border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.4)"><thead><tr style="background:#141414">${ths}</tr></thead><tbody>${trs}</tbody></table></div>`;
     })
     // Unordered lists
     .replace(/^[-✅❌✓•] (.+)$/gm, '<li style="margin:4px 0;padding-left:4px">$1</li>')
@@ -40,9 +41,9 @@ function renderMarkdown(md: string): string {
     // Ordered lists
     .replace(/^\d+\. (.+)$/gm, '<li style="margin:4px 0;padding-left:4px">$1</li>')
     // Horizontal rule
-    .replace(/^---$/gm, '<hr style="border:none;border-top:1px solid #f3f4f6;margin:20px 0">')
+    .replace(/^---$/gm, '<hr style="border:none;border-top:1px solid #1F1F1F;margin:20px 0">')
     // Line breaks (double newline → paragraph)
-    .replace(/\n\n/g, '</p><p style="margin:0 0 10px;line-height:1.7;color:#374151;font-size:15px">')
+    .replace(/\n\n/g, '</p><p style="margin:0 0 10px;line-height:1.7;color:#CCCCCC;font-size:15px">')
     // Single newline → <br>
     .replace(/\n/g, '<br>');
 }
@@ -62,7 +63,6 @@ const LessonPage: NextPage = () => {
   const [completed, setCompleted] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Charge la leçon + le cours pour la navigation
   useEffect(() => {
     if (!cId || !lId) return;
     const load = async () => {
@@ -106,7 +106,7 @@ const LessonPage: NextPage = () => {
         <style>{`@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}`}</style>
         <div style={{ maxWidth: 800 }}>
           {[40, 500, 100].map((h, i) => (
-            <div key={i} style={{ height: h, borderRadius: 12, background: 'linear-gradient(90deg,#f3f4f6 25%,#e5e7eb 50%,#f3f4f6 75%)', backgroundSize: '200% 100%', animation: 'shimmer 1.5s infinite', marginBottom: 16 }} />
+            <div key={i} style={{ height: h, borderRadius: 12, background: 'linear-gradient(90deg,#1A1A1A 25%,#222222 50%,#1A1A1A 75%)', backgroundSize: '200% 100%', animation: 'shimmer 1.5s infinite', marginBottom: 16 }} />
           ))}
         </div>
       </AppLayout>
@@ -116,10 +116,10 @@ const LessonPage: NextPage = () => {
   if (error || !lesson) {
     return (
       <AppLayout>
-        <button onClick={() => router.push(`/formation/${cId}`)} style={{ background: 'none', border: 'none', color: '#6b7280', fontSize: 14, fontWeight: 600, cursor: 'pointer', padding: 0, marginBottom: 16, fontFamily: 'inherit' }}>
+        <button onClick={() => router.push(`/formation/${cId}`)} style={{ background: 'none', border: 'none', color: '#888888', fontSize: 14, fontWeight: 600, cursor: 'pointer', padding: 0, marginBottom: 16, fontFamily: 'inherit' }}>
           ← Retour au cours
         </button>
-        <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 12, padding: 20, color: '#dc2626' }}>
+        <div style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.20)', borderRadius: 12, padding: 20, color: '#ef4444' }}>
           ⚠️ {error ?? 'Leçon introuvable.'}
         </div>
       </AppLayout>
@@ -132,14 +132,20 @@ const LessonPage: NextPage = () => {
 
   return (
     <AppLayout>
+      <PageSEO
+        title={`${lesson.title} — Formation Alvio`}
+        description={`Leçon "${lesson.title}" — Formation trading Alvio. Tutoriel interactif avec exercices pratiques pour maîtriser les stratégies algorithmiques.`}
+        canonical={`${SITE_URL}/formation/${cId}/${lId}`}
+        ogImage={`${SITE_URL}/og-formation.png`}
+      />
       <Head><title>{lesson.title} — Alvio</title></Head>
 
       {/* ── Back ──────────────────────────────────────────────── */}
       <button
         onClick={() => router.push(`/formation/${cId}`)}
-        style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: '#6b7280', fontSize: 14, fontWeight: 600, cursor: 'pointer', padding: 0, marginBottom: 20, fontFamily: 'inherit' }}
-        onMouseEnter={(e) => (e.currentTarget.style.color = '#111827')}
-        onMouseLeave={(e) => (e.currentTarget.style.color = '#6b7280')}
+        style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: '#888888', fontSize: 14, fontWeight: 600, cursor: 'pointer', padding: 0, marginBottom: 20, fontFamily: 'inherit' }}
+        onMouseEnter={(e) => (e.currentTarget.style.color = '#FFFFFF')}
+        onMouseLeave={(e) => (e.currentTarget.style.color = '#888888')}
       >
         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -150,18 +156,18 @@ const LessonPage: NextPage = () => {
       <div style={{ maxWidth: 860, margin: '0 auto' }}>
 
         {/* ── Header leçon ──────────────────────────────────── */}
-        <div style={{ background: '#fff', borderRadius: 16, padding: '24px 28px', marginBottom: 20, boxShadow: '0 1px 3px rgba(0,0,0,0.07)' }}>
+        <div style={{ background: '#111111', borderRadius: 16, padding: '24px 28px', marginBottom: 20, border: '1px solid #1F1F1F', boxShadow: '0 1px 3px rgba(0,0,0,0.4)' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
             <div>
-              <div style={{ display: 'flex', gap: 8, marginBottom: 8, fontSize: 12, color: '#9ca3af' }}>
+              <div style={{ display: 'flex', gap: 8, marginBottom: 8, fontSize: 12, color: '#444444' }}>
                 <span>{lesson.type === 'VIDEO' ? '▶ Vidéo' : lesson.type === 'ARTICLE' ? '📄 Article' : '❓ Quiz'}</span>
                 <span>·</span>
                 <span>Leçon {currentIdx + 1}/{allLessons.length}</span>
               </div>
-              <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: '#111827', fontFamily: "'Plus Jakarta Sans','Inter',sans-serif", lineHeight: 1.2 }}>
+              <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: '#FFFFFF', fontFamily: "'Plus Jakarta Sans','Inter',sans-serif", lineHeight: 1.2 }}>
                 {lesson.title}
               </h1>
-              <p style={{ margin: '6px 0 0', fontSize: 14, color: '#6b7280' }}>{lesson.description}</p>
+              <p style={{ margin: '6px 0 0', fontSize: 14, color: '#888888' }}>{lesson.description}</p>
             </div>
 
             {/* Bouton "Marquer complété" */}
@@ -173,8 +179,8 @@ const LessonPage: NextPage = () => {
                 padding: '10px 20px', borderRadius: 12, border: 'none',
                 fontSize: 14, fontWeight: 700, cursor: completed ? 'default' : 'pointer',
                 fontFamily: 'inherit',
-                background: completed ? '#f0fdf4' : '#2563eb',
-                color: completed ? '#10b981' : '#fff',
+                background: completed ? 'rgba(34,197,94,0.12)' : '#2563eb',
+                color: completed ? '#22c55e' : '#fff',
                 transition: 'all 0.2s',
               }}
             >
@@ -201,7 +207,7 @@ const LessonPage: NextPage = () => {
 
         {/* ── Lecteur vidéo YouTube ─────────────────────────── */}
         {lesson.type === 'VIDEO' && lesson.videoUrl && (
-          <div style={{ marginBottom: 20, borderRadius: 16, overflow: 'hidden', boxShadow: '0 4px 16px rgba(0,0,0,0.12)', aspectRatio: '16/9', background: '#000' }}>
+          <div style={{ marginBottom: 20, borderRadius: 16, overflow: 'hidden', boxShadow: '0 4px 16px rgba(0,0,0,0.4)', aspectRatio: '16/9', background: '#000' }}>
             <iframe
               src={`${lesson.videoUrl}?rel=0&modestbranding=1&color=white`}
               title={lesson.title}
@@ -223,8 +229,8 @@ const LessonPage: NextPage = () => {
 
         {/* ── Contenu markdown ──────────────────────────────── */}
         <div
-          style={{ background: '#fff', borderRadius: 16, padding: '28px 32px', marginBottom: 20, boxShadow: '0 1px 3px rgba(0,0,0,0.07)', lineHeight: 1.7, color: '#374151', fontSize: 15 }}
-          dangerouslySetInnerHTML={{ __html: `<p style="margin:0 0 10px;line-height:1.7;color:#374151;font-size:15px">${renderMarkdown(lesson.content)}</p>` }}
+          style={{ background: '#111111', borderRadius: 16, padding: '28px 32px', marginBottom: 20, border: '1px solid #1F1F1F', boxShadow: '0 1px 3px rgba(0,0,0,0.4)', lineHeight: 1.7, color: '#CCCCCC', fontSize: 15 }}
+          dangerouslySetInnerHTML={{ __html: `<p style="margin:0 0 10px;line-height:1.7;color:#CCCCCC;font-size:15px">${renderMarkdown(lesson.content)}</p>` }}
         />
 
         {/* ── Navigation précédente / suivante ──────────────── */}
@@ -234,19 +240,19 @@ const LessonPage: NextPage = () => {
             disabled={!prevLesson}
             style={{
               flex: 1, display: 'flex', alignItems: 'center', gap: 10, padding: '14px 20px',
-              borderRadius: 12, border: '1px solid #e5e7eb', background: '#fff',
+              borderRadius: 12, border: '1px solid #2A2A2A', background: '#111111',
               cursor: prevLesson ? 'pointer' : 'default', opacity: prevLesson ? 1 : 0.4,
-              fontSize: 14, fontWeight: 600, color: '#374151', fontFamily: 'inherit',
+              fontSize: 14, fontWeight: 600, color: '#CCCCCC', fontFamily: 'inherit',
               transition: 'border-color 0.15s',
             }}
             onMouseEnter={(e) => { if (prevLesson) e.currentTarget.style.borderColor = '#2563eb'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e5e7eb'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#2A2A2A'; }}
           >
             <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
             <div style={{ textAlign: 'left' }}>
-              <div style={{ fontSize: 11, color: '#9ca3af', marginBottom: 2 }}>Précédent</div>
+              <div style={{ fontSize: 11, color: '#444444', marginBottom: 2 }}>Précédent</div>
               <div style={{ fontSize: 13 }}>{prevLesson?.title ?? '—'}</div>
             </div>
           </button>
@@ -262,7 +268,7 @@ const LessonPage: NextPage = () => {
             style={{
               flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 10,
               padding: '14px 20px', borderRadius: 12, border: 'none',
-              background: nextLesson ? '#2563eb' : '#10b981',
+              background: nextLesson ? '#2563eb' : '#22c55e',
               cursor: 'pointer', fontSize: 14, fontWeight: 700,
               color: '#fff', fontFamily: 'inherit',
               transition: 'opacity 0.15s',

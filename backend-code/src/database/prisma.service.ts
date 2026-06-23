@@ -52,4 +52,12 @@ export class PrismaService {
   get userProgress() {
     return this.prisma.userProgress;
   }
+
+  get portfolioSnapshot() {
+    return this.prisma.portfolioSnapshot;
+  }
+
+  get simulationResult() {
+    return this.prisma.simulationResult;
+  }
 }

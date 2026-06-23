@@ -11,6 +11,7 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { authApi } from '../../api';
 import { useAuthStore } from '../../context/authStore';
+import PageSEO from '../../components/seo/PageSEO';
 
 const MagicCallbackPage: NextPage = () => {
   const router = useRouter();
@@ -47,6 +48,7 @@ const MagicCallbackPage: NextPage = () => {
 
   return (
     <>
+      <PageSEO title="Connexion Magic Link — Alvio" description="Connexion par lien magique Alvio. Accès rapide et sécurisé sans mot de passe." noindex={true} />
       <Head><title>Connexion en cours… — Alvio</title></Head>
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f9fafb', fontFamily: "'Inter', sans-serif" }}>
         <div style={{ textAlign: 'center', padding: '40px', background: 'white', borderRadius: '20px', boxShadow: '0 4px 24px rgba(0,0,0,0.08)', maxWidth: '400px', width: '100%' }}>

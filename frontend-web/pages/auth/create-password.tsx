@@ -3,6 +3,7 @@ import type { NextPage } from 'next';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { authApi } from '../../api';
+import PageSEO from '../../components/seo/PageSEO';
 
 const CreatePasswordPage: NextPage = () => {
   const router = useRouter();
@@ -45,6 +46,7 @@ const CreatePasswordPage: NextPage = () => {
 
   return (
     <>
+      <PageSEO title="Créer un mot de passe — Alvio" description="Finalisez votre inscription Alvio en créant votre mot de passe sécurisé." noindex={true} />
       <Head><title>Créer un mot de passe — Alvio</title></Head>
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f9fafb', fontFamily: "'Inter', sans-serif" }}>
         <div style={{ width: '100%', maxWidth: '420px', padding: '40px', background: 'white', borderRadius: '20px', boxShadow: '0 4px 24px rgba(0,0,0,0.08)' }}>

@@ -3,6 +3,7 @@ import type { NextPage } from 'next';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import AppLayout from '../../components/layout/AppLayout';
+import PageSEO from '../../components/seo/PageSEO';
 
 const card: React.CSSProperties = {
   backgroundColor: 'white',
@@ -32,6 +33,11 @@ const SignalDetailPage: NextPage = () => {
 
   return (
     <AppLayout>
+      <PageSEO
+        title={`${signal.asset} — Signal ${signal.direction} — Alvio`}
+        description={`Signal ${signal.direction} sur ${signal.asset} — Confiance ${signal.confidence}%. Pattern: ${signal.pattern}. Analyse IA Alvio.`}
+        noindex={true}
+      />
       <Head><title>{signal.asset} — Signal — Alvio</title></Head>
 
       {/* Back button + header */}

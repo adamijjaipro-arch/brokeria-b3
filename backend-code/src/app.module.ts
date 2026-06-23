@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DatabaseModule } from './database/prisma.module';
@@ -18,10 +19,14 @@ import { LoggingModule } from './logging/logging.module';
 import { TotpModule } from './mfa/totp/totp.module';
 import { WebAuthnModule } from './mfa/webauthn/webauthn.module';
 import { FormationModule } from './formation/formation.module';
+import { MarketsModule }   from './markets/markets.module';
+import { PortfolioModule } from './portfolio/portfolio.module';
+import { PatternsModule }  from './patterns/patterns.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    ScheduleModule.forRoot(),
     // @Global() modules — disponibles partout sans import explicite
     RedisModule,
     MetricsModule,
@@ -41,6 +46,12 @@ import { FormationModule } from './formation/formation.module';
     WebAuthnModule,
     // Formation
     FormationModule,
+    // Markets (CoinGecko proxy + Redis cache)
+    MarketsModule,
+    // Portfolio (historique du capital + KPIs dashboard)
+    PortfolioModule,
+    // Patterns (Module 3 — détection de signaux via Python AI engine)
+    PatternsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

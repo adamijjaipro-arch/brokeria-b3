@@ -26,14 +26,14 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('register')
-  async register(@Body() dto: RegisterDto, @Req() req: Request) {
-    return this.authService.register(dto, getIp(req));
+  async register(@Body() dto: RegisterDto, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    return this.authService.register(dto, res, getIp(req));
   }
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  async login(@Body() dto: LoginDto, @Req() req: Request) {
-    return this.authService.login(dto, getIp(req));
+  async login(@Body() dto: LoginDto, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    return this.authService.login(dto, res, getIp(req));
   }
 
   @Post('magic-link/request')
@@ -59,11 +59,16 @@ export class AuthController {
     const frontendUrl = process.env.FRONTEND_URL ?? 'http://localhost:3006';
     try {
       const result = await this.authService.handleGithubCallback(req.user, getIp(req));
-      if (result.startsWith('no-email:')) {
-        res.redirect(`${frontendUrl}/login?error=no_email`);
+      if (typeof result === 'string') {
+        if (result.startsWith('no-email:')) {
+          res.redirect(`${frontendUrl}/login?error=no_email`);
+        } else {
+          res.redirect(`${frontendUrl}/auth/2fa?token=${result}`);
+        }
         return;
       }
-      res.redirect(`${frontendUrl}/auth/2fa?token=${result}`);
+      // 2FA désactivé — redirection directe avec le token dans l'URL
+      res.redirect(`${frontendUrl}/auth/callback?token=${result.accessToken}`);
     } catch {
       res.redirect(`${frontendUrl}/login?error=github_failed`);
     }
@@ -103,6 +108,12 @@ export class AuthController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     await this.authService.logout(req, res);
+  }
+
+  @Post('dev-login')
+  @HttpCode(HttpStatus.OK)
+  async devLogin(@Body() body: { email: string }, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    return this.authService.devLogin(body.email, res, getIp(req));
   }
 
   @Get('profile')

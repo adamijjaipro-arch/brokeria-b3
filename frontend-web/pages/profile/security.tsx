@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { totpApi, webAuthnApi } from '@/api';
 import { useAuthStore } from '@/context/authStore';
+import PageSEO from '@/components/seo/PageSEO';
 
 interface WebAuthnCredential {
   id: string;
@@ -90,6 +91,11 @@ export default function SecurityPage() {
 
   return (
     <div className="min-h-screen bg-gray-950 px-4 py-12">
+      <PageSEO
+        title="Sécurité du compte — Alvio"
+        description="Gérez la sécurité de votre compte Alvio : authentification 2FA, clés WebAuthn, TOTP et PIN."
+        noindex={true}
+      />
       <div className="max-w-2xl mx-auto space-y-8">
 
         {/* Header */}

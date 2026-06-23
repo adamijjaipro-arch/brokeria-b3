@@ -3,6 +3,7 @@ import type { NextPage } from 'next';
 import Head from 'next/head';
 import AppLayout from '../../components/layout/AppLayout';
 import { authApi } from '../../api';
+import PageSEO from '../../components/seo/PageSEO';
 
 const card: React.CSSProperties = {
   backgroundColor: 'white',
@@ -51,6 +52,11 @@ const ProfilePage: NextPage = () => {
 
   return (
     <AppLayout title="Mon Profil" subtitle="Gérez vos informations personnelles et vos préférences">
+      <PageSEO
+        title="Mon Profil — Alvio"
+        description="Profil utilisateur Alvio. Gérez vos informations personnelles, préférences et paramètres de compte."
+        noindex={true}
+      />
       <Head><title>Mon Profil — Alvio</title></Head>
 
       {/* Profile card */}

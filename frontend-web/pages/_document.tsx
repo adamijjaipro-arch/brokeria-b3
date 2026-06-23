@@ -1,29 +1,56 @@
 import { Html, Head, Main, NextScript } from 'next/document';
-
-// SVG du logo Alvio encodé en data URI pour le favicon
-const FAVICON_SVG = `data:image/svg+xml,${encodeURIComponent(
-  '<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">' +
-  '<rect width="32" height="32" rx="8" fill="#0d1117"/>' +
-  '<polygon points="16,4 28,26 4,26" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linejoin="round"/>' +
-  '<polyline points="7,22 11,15 15,18 20,9 26,13" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>' +
-  '<circle cx="20" cy="9" r="2.5" fill="#10b981"/>' +
-  '</svg>'
-)}`;
+import { ORGANIZATION_JSONLD, WEBSITE_JSONLD, SITE_URL, SITE_NAME } from '../lib/seo';
 
 export default function Document() {
   return (
-    <Html lang="fr">
+    <Html lang="fr" suppressHydrationWarning>
       <Head>
-        {/* Favicon Alvio */}
-        <link rel="icon" type="image/svg+xml" href={FAVICON_SVG} />
-        <link rel="shortcut icon" href={FAVICON_SVG} />
-        <meta name="application-name" content="Alvio" />
-        <meta name="apple-mobile-web-app-title" content="Alvio" />
+        {/* ── Charset & Base ─────────────────────────────── */}
+        <meta charSet="utf-8" />
+        <meta name="author" content={SITE_NAME} />
+        <meta name="creator" content={SITE_NAME} />
+        <meta name="publisher" content={SITE_NAME} />
+        <meta name="theme-color" content="#3B82F6" />
+        <meta name="color-scheme" content="dark" />
+        <meta name="application-name" content={SITE_NAME} />
+        <meta name="apple-mobile-web-app-title" content={SITE_NAME} />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="format-detection" content="telephone=no" />
 
-        {/* Fonts */}
+        {/* ── Favicons ───────────────────────────────────── */}
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+        <link rel="shortcut icon" href="/favicon.ico" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+        <link rel="mask-icon" href="/favicon.svg" color="#3B82F6" />
+
+        {/* ── PWA Manifest ───────────────────────────────── */}
+        <link rel="manifest" href="/manifest.json" />
+
+        {/* ── Fonts — next/font handled in _app, preconnect here ── */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap"
+          rel="stylesheet"
+        />
+
+        {/* ── DNS Prefetch ────────────────────────────────── */}
+        <link rel="dns-prefetch" href="//fonts.googleapis.com" />
+        <link rel="dns-prefetch" href="//fonts.gstatic.com" />
+
+        {/* ── JSON-LD: Organization + WebSite (global) ───── */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(ORGANIZATION_JSONLD) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(WEBSITE_JSONLD) }}
+        />
       </Head>
       <body>
         <Main />
