@@ -112,12 +112,12 @@ const FormationPage: NextPage = () => {
             </p>
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
               {progress.courseStats.map((cs) => (
-                <div key={cs.courseId} onClick={() => router.push(`/formation/${cs.courseId}`)}
-                  style={{ background: 'rgba(255,255,255,0.12)', borderRadius: 10, padding: '6px 14px', fontSize: 13, color: '#fff', cursor: 'pointer', transition: 'background 0.15s' }}
+                <button key={cs.courseId} onClick={() => router.push(`/formation/${cs.courseId}`)}
+                  style={{ background: 'rgba(255,255,255,0.12)', border: 'none', borderRadius: 10, padding: '6px 14px', fontSize: 13, fontFamily: 'inherit', color: '#fff', cursor: 'pointer', transition: 'background 0.15s' }}
                   onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.22)')}
                   onMouseLeave={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.12)')}>
                   {cs.title.split(' ').slice(0, 3).join(' ')} — <strong>{cs.progressPercent}%</strong>
-                </div>
+                </button>
               ))}
             </div>
           </div>
@@ -170,8 +170,8 @@ interface CardProps {
 
 function CourseCard({ course, cfg, onOpen }: CardProps) {
   return (
-    <div onClick={onOpen}
-      style={{ background: '#111111', border: '1px solid #1F1F1F', borderRadius: 16, overflow: 'hidden', cursor: 'pointer', transition: 'transform 0.15s, box-shadow 0.15s' }}
+    <button onClick={onOpen}
+      style={{ display: 'block', width: '100%', textAlign: 'left', font: 'inherit', padding: 0, background: '#111111', border: '1px solid #1F1F1F', borderRadius: 16, overflow: 'hidden', cursor: 'pointer', transition: 'transform 0.15s, box-shadow 0.15s' }}
       onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.5)'; e.currentTarget.style.borderColor = '#2A2A2A'; }}
       onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.borderColor = '#1F1F1F'; }}
     >
@@ -202,7 +202,7 @@ function CourseCard({ course, cfg, onOpen }: CardProps) {
       <div style={{ padding: '16px 20px 20px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
           <span style={{ fontSize: 11, fontWeight: 700, color: cfg.color, background: cfg.bg, padding: '2px 8px', borderRadius: 99 }}>{cfg.label}</span>
-          <span style={{ fontSize: 11, color: '#555555' }}>{course.category}</span>
+          <span style={{ fontSize: 11, color: '#9ca3af' }}>{course.category}</span>
         </div>
 
         <h3 style={{ margin: '0 0 6px', fontSize: 16, fontWeight: 700, color: '#FFFFFF', fontFamily: "'Plus Jakarta Sans','Inter',sans-serif", lineHeight: 1.3 }}>
@@ -212,7 +212,7 @@ function CourseCard({ course, cfg, onOpen }: CardProps) {
           {course.description}
         </p>
 
-        <div style={{ display: 'flex', gap: 14, marginBottom: 12, fontSize: 12, color: '#555555' }}>
+        <div style={{ display: 'flex', gap: 14, marginBottom: 12, fontSize: 12, color: '#9ca3af' }}>
           <span>📚 {course.totalLessons} leçons</span>
           <span>⏱ {fmtDuration(course.duration)}</span>
         </div>
@@ -228,7 +228,7 @@ function CourseCard({ course, cfg, onOpen }: CardProps) {
           </div>
         </div>
       </div>
-    </div>
+    </button>
   );
 }
 

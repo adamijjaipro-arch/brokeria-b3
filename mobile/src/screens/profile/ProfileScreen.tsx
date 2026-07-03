@@ -10,10 +10,20 @@ import {
 } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAuth } from '../../hooks/useAuth';
+import { API_URL } from '../../constants/api';
+
+interface SignalStats {
+  totalSignals: number;
+  averageConfidence: number;
+}
 
 export default function ProfileScreen({ navigation }) {
-  const [user, setUser] = useState(null);
+  const { logout } = useAuth();
+  const [user, setUser] = useState<any>(null);
+  const [signalStats, setSignalStats] = useState<SignalStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
@@ -23,15 +33,19 @@ export default function ProfileScreen({ navigation }) {
   }, [navigation]);
 
   const fetchUser = async () => {
+    setLoading(true);
+    setError(null);
     try {
-      setLoading(true);
-      const token = await AsyncStorage.getItem('userToken');
-      const response = await axios.get('http://localhost:3001/api/auth/profile', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setUser(response.data.data);
-    } catch (error) {
-      console.error('Failed to fetch user:', error);
+      const token = await AsyncStorage.getItem('accessToken');
+      const headers = { Authorization: `Bearer ${token}` };
+      const [profileRes, statsRes] = await Promise.all([
+        axios.get(`${API_URL}/auth/profile`, { headers }),
+        axios.get(`${API_URL}/signals/statistics`, { headers }),
+      ]);
+      setUser(profileRes.data.data);
+      setSignalStats(statsRes.data.data);
+    } catch (err: any) {
+      setError(err.message || 'Erreur réseau');
     } finally {
       setLoading(false);
     }
@@ -43,11 +57,7 @@ export default function ProfileScreen({ navigation }) {
       {
         text: 'Logout',
         onPress: async () => {
-          await AsyncStorage.removeItem('userToken');
-          navigation.reset({
-            index: 0,
-            routes: [{ name: 'Auth' }],
-          });
+          await logout();
         },
       },
     ]);
@@ -57,6 +67,17 @@ export default function ProfileScreen({ navigation }) {
     return (
       <View style={styles.centerContainer}>
         <ActivityIndicator size="large" color="#3b82f6" />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.centerContainer}>
+        <Text style={styles.errorText}>❌ {error}</Text>
+        <TouchableOpacity style={styles.retryButton} onPress={fetchUser}>
+          <Text style={styles.retryText}>Réessayer</Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -106,13 +127,13 @@ export default function ProfileScreen({ navigation }) {
 
         <View style={styles.statsGrid}>
           <View style={styles.statCard}>
-            <Text style={styles.statValue}>0</Text>
+            <Text style={styles.statValue}>{signalStats?.totalSignals ?? 0}</Text>
             <Text style={styles.statLabel}>Total Signals</Text>
           </View>
 
           <View style={styles.statCard}>
-            <Text style={styles.statValue}>0%</Text>
-            <Text style={styles.statLabel}>Win Rate</Text>
+            <Text style={styles.statValue}>{signalStats?.averageConfidence?.toFixed(0) ?? 0}%</Text>
+            <Text style={styles.statLabel}>Avg Confidence</Text>
           </View>
         </View>
       </View>
@@ -232,5 +253,22 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  errorText: {
+    color: '#ef4444',
+    fontSize: 16,
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  retryButton: {
+    backgroundColor: '#f59e0b',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  retryText: {
+    color: '#ffffff',
+    fontWeight: 'bold',
+    fontSize: 14,
   },
 });

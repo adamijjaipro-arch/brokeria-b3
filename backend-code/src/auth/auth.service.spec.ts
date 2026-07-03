@@ -225,5 +225,38 @@ describe('AuthService', () => {
         service.verifyPin('pin-token', 'wrong', mockRes, '127.0.0.1'),
       ).rejects.toThrow(UnauthorizedException);
     });
+
+    it('lève UnauthorizedException si le pinAuthToken est expiré (absent de Redis)', async () => {
+      mockRedis.get.mockResolvedValue(null); // token expiré — clé absente de Redis
+
+      const mockRes = { cookie: jest.fn() } as unknown as import('express').Response;
+
+      await expect(
+        service.verifyPin('expired-pin-token', '1234', mockRes, '127.0.0.1'),
+      ).rejects.toThrow(UnauthorizedException);
+
+      expect(mockPrisma.user.findUnique).not.toHaveBeenCalled();
+    });
+
+    it('pose un cookie httpOnly lors d\'une vérification PIN réussie', async () => {
+      const pinHash = await bcrypt.hash('9999', 10);
+      const stored  = JSON.stringify({ userId: 'u5', email: 'cookie@example.com' });
+
+      mockRedis.get.mockImplementation((key: string) =>
+        key.startsWith('pinauth:') ? Promise.resolve(stored) : Promise.resolve(null),
+      );
+      mockPrisma.user.findUnique.mockResolvedValue({
+        id: 'u5', email: 'cookie@example.com', username: 'cookieuser', pin: pinHash,
+      });
+
+      const mockRes = { cookie: jest.fn() } as unknown as import('express').Response;
+
+      await service.verifyPin('pin-token', '9999', mockRes, '127.0.0.1');
+
+      expect(mockRes.cookie).toHaveBeenCalled();
+      const [cookieName, , cookieOptions] = (mockRes.cookie as jest.Mock).mock.calls[0];
+      expect(typeof cookieName).toBe('string');
+      expect(cookieOptions).toMatchObject({ httpOnly: true });
+    });
   });
 });

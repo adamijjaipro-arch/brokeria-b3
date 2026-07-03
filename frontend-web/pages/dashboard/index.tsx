@@ -213,22 +213,24 @@ const Dashboard: NextPage = () => {
                 { asset: 'XRP/USDT', dir: 'BUY', conf: 83, pattern: 'Ascending Triangle' },
               ]
           ).map((s, i) => (
-            <div key={i} onClick={() => router.push('/signals')} style={{
-              display: 'flex', alignItems: 'center', gap: '12px',
-              padding: '10px 0', borderBottom: i < 3 ? '1px solid #1F1F1F' : 'none', cursor: 'pointer',
+            <button key={i} onClick={() => router.push('/signals')} style={{
+              display: 'flex', alignItems: 'center', gap: '12px', width: '100%',
+              padding: '10px 0', borderLeft: 'none', borderRight: 'none', borderTop: 'none',
+              borderBottom: i < 3 ? '1px solid #1F1F1F' : 'none', cursor: 'pointer',
+              background: 'none', font: 'inherit', textAlign: 'left',
             }}>
               <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(34,197,94,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <svg width="16" height="16" fill="none" stroke="#22c55e" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 10l7-7m0 0l7 7m-7-7v18" /></svg>
+                <svg width="16" height="16" fill="none" stroke="#22c55e" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 10l7-7m0 0l7 7m-7-7v18" /></svg>
               </div>
               <div style={{ flex: 1 }}>
                 <p style={{ fontSize: '13px', fontWeight: 700, color: '#FFFFFF', margin: 0 }}>{s.asset}</p>
-                <p style={{ fontSize: '11px', color: '#555555', margin: 0 }}>{s.pattern}</p>
+                <p style={{ fontSize: '11px', color: '#9ca3af', margin: 0 }}>{s.pattern}</p>
               </div>
               <div style={{ textAlign: 'right' }}>
                 <span style={{ background: '#2563eb', color: 'white', fontSize: '11px', fontWeight: 700, padding: '2px 8px', borderRadius: '6px' }}>{s.dir}</span>
                 <p style={{ fontSize: '12px', fontWeight: 700, color: '#FFFFFF', margin: '2px 0 0', textAlign: 'center' }}>{s.conf}%</p>
               </div>
-            </div>
+            </button>
           ))}
         </div>
       </div>

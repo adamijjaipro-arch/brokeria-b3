@@ -9,11 +9,13 @@ import {
 } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_URL } from '../../constants/api';
 
 export default function SignalsScreen({ navigation }) {
   const [signals, setSignals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
@@ -23,15 +25,16 @@ export default function SignalsScreen({ navigation }) {
   }, [navigation]);
 
   const fetchSignals = async () => {
+    setLoading(true);
+    setError(null);
     try {
-      setLoading(true);
-      const token = await AsyncStorage.getItem('userToken');
-      const response = await axios.get('http://localhost:3001/api/signals', {
+      const token = await AsyncStorage.getItem('accessToken');
+      const response = await axios.get(`${API_URL}/signals`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setSignals(response.data.data || []);
-    } catch (error) {
-      console.error('Failed to fetch signals:', error);
+    } catch (err: any) {
+      setError(err.message || 'Erreur réseau');
     } finally {
       setLoading(false);
     }
@@ -93,6 +96,17 @@ export default function SignalsScreen({ navigation }) {
       </View>
     </TouchableOpacity>
   );
+
+  if (error) {
+    return (
+      <View style={[styles.container, styles.centerContainer]}>
+        <Text style={styles.errorText}>❌ {error}</Text>
+        <TouchableOpacity style={styles.retryButton} onPress={fetchSignals}>
+          <Text style={styles.retryText}>Réessayer</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -226,5 +240,22 @@ const styles = StyleSheet.create({
   emptyText: {
     color: '#cbd5e1',
     fontSize: 16,
+  },
+  errorText: {
+    color: '#ef4444',
+    fontSize: 16,
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  retryButton: {
+    backgroundColor: '#f59e0b',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  retryText: {
+    color: '#ffffff',
+    fontWeight: 'bold',
+    fontSize: 14,
   },
 });

@@ -64,7 +64,7 @@ const TwoFAPage: NextPage = () => {
           </div>
 
           <h2 style={{ fontSize: '22px', fontWeight: 700, color: '#111827', margin: '0 0 8px', textAlign: 'center' }}>Étape 2 — Code email</h2>
-          <p style={{ fontSize: '14px', color: '#6b7280', margin: '0 0 8px', textAlign: 'center', lineHeight: '1.6' }}>
+          <p id="otp-help-text" style={{ fontSize: '14px', color: '#6b7280', margin: '0 0 8px', textAlign: 'center', lineHeight: '1.6' }}>
             Un code à 6 chiffres a été envoyé à votre adresse email.
           </p>
 
@@ -89,6 +89,7 @@ const TwoFAPage: NextPage = () => {
               <input
                 type="text" inputMode="numeric" pattern="[0-9]*" maxLength={6}
                 placeholder="000000" value={otp}
+                aria-describedby="otp-help-text"
                 onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
                 style={{
                   width: '100%', padding: '14px', border: `2px solid ${error ? '#fca5a5' : '#e5e7eb'}`,
@@ -101,7 +102,7 @@ const TwoFAPage: NextPage = () => {
             </div>
 
             {error && (
-              <div style={{ background: '#fef2f2', borderRadius: '10px', padding: '12px 14px', border: '1px solid #fecaca' }}>
+              <div role="alert" aria-live="polite" style={{ background: '#fef2f2', borderRadius: '10px', padding: '12px 14px', border: '1px solid #fecaca' }}>
                 <p style={{ fontSize: '13px', color: '#dc2626', margin: '0 0 6px', fontWeight: 600 }}>{error}</p>
                 {attemptsLeft > 0 && attemptsLeft < 3 && (
                   <p style={{ fontSize: '12px', color: '#ef4444', margin: 0 }}>

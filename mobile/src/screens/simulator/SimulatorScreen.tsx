@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_URL } from '../../constants/api';
 
 export default function SimulatorScreen() {
   const [initialAmount, setInitialAmount] = useState('10000');
@@ -18,14 +19,16 @@ export default function SimulatorScreen() {
   const [annualReturn, setAnnualReturn] = useState('0.08');
   const [volatility, setVolatility] = useState('0.15');
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState(null);
+  const [result, setResult] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSimulate = async () => {
     setLoading(true);
+    setError(null);
     try {
-      const token = await AsyncStorage.getItem('userToken');
+      const token = await AsyncStorage.getItem('accessToken');
       const response = await axios.post(
-        'http://localhost:3001/api/simulator/dca',
+        `${API_URL}/simulator/dca`,
         {
           initialAmount: parseFloat(initialAmount),
           monthlyInvestment: parseFloat(monthlyInvestment),
@@ -37,9 +40,9 @@ export default function SimulatorScreen() {
           headers: { Authorization: `Bearer ${token}` },
         },
       );
-      setResult(response.data);
-    } catch (error) {
-      console.error('Simulation error:', error);
+      setResult(response.data.data);
+    } catch (err: any) {
+      setError(err.message || 'Erreur réseau');
     } finally {
       setLoading(false);
     }
@@ -116,10 +119,16 @@ export default function SimulatorScreen() {
         </TouchableOpacity>
       </View>
 
+      {error && (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>❌ {error}</Text>
+        </View>
+      )}
+
       {result && (
         <View style={styles.resultContainer}>
           <Text style={styles.resultTitle}>Simulation Results</Text>
-          
+
           <View style={styles.resultRow}>
             <Text style={styles.resultLabel}>Initial Investment</Text>
             <Text style={styles.resultValue}>${parseFloat(initialAmount).toFixed(2)}</Text>
@@ -150,6 +159,32 @@ export default function SimulatorScreen() {
               {result.roi?.toFixed(2)}%
             </Text>
           </View>
+
+          {result.monthlyData?.length > 0 && (() => {
+            const maxBalance = Math.max(...result.monthlyData.map((m: any) => m.balance));
+            return (
+              <View style={styles.chartWrapper}>
+                <Text style={styles.chartTitle}>Évolution mensuelle</Text>
+                <View style={styles.chartBars}>
+                  {result.monthlyData.map((d: any, i: number) => (
+                    <View key={i} style={styles.barCol}>
+                      <View style={[
+                        styles.bar,
+                        {
+                          height: Math.max((d.balance / maxBalance) * 60, 4),
+                          backgroundColor: d.gainLoss >= 0 ? '#10b981' : '#ef4444',
+                        },
+                      ]} />
+                    </View>
+                  ))}
+                </View>
+                <View style={styles.chartFooter}>
+                  <Text style={styles.chartFooterText}>Mois 1</Text>
+                  <Text style={styles.chartFooterText}>Mois {result.months}</Text>
+                </View>
+              </View>
+            );
+          })()}
         </View>
       )}
     </ScrollView>
@@ -210,6 +245,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+  errorContainer: {
+    backgroundColor: '#1e293b',
+    borderRadius: 8,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#ef4444',
+  },
+  errorText: {
+    color: '#ef4444',
+    fontSize: 14,
+  },
   resultContainer: {
     backgroundColor: '#1e293b',
     borderRadius: 8,
@@ -239,5 +286,39 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     color: '#ffffff',
+  },
+  chartWrapper: {
+    marginTop: 20,
+    borderTopWidth: 1,
+    borderTopColor: '#334155',
+    paddingTop: 16,
+  },
+  chartTitle: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#94a3b8',
+    marginBottom: 10,
+  },
+  chartBars: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    height: 70,
+    gap: 2,
+  },
+  barCol: {
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+  bar: {
+    borderRadius: 2,
+  },
+  chartFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 6,
+  },
+  chartFooterText: {
+    fontSize: 10,
+    color: '#64748b',
   },
 });

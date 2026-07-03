@@ -1,0 +1,220 @@
+---
+title: MCD Alvio — Modèle Conceptuel de Données
+---
+erDiagram
+
+    %% ════════════════════════════════════════════════════════════
+    %% ENTITÉS PRINCIPALES
+    %% ════════════════════════════════════════════════════════════
+
+    User {
+        String  id                  PK  "cuid()"
+        String  username            UK
+        String  email               UK
+        String  passwordHash            "nullable — GitHub/MagicLink users"
+        String  githubId            UK  "nullable"
+        String  pin                     "nullable — 3e facteur"
+        String  totpSecret              "nullable — chiffré AES-256-GCM"
+        Boolean totpEnabled
+        String  trading_preference      "default: moderate"
+        Boolean email_notifications
+        DateTime createdAt
+        DateTime updatedAt
+    }
+
+    Signal {
+        String   id                 PK
+        String   userId             FK
+        String   strategyId         FK  "nullable"
+        String   asset
+        String   timeframe              "1h | 4h | 1d"
+        String   direction              "BUY | SELL | HOLD"
+        String   status                 "OPEN | CLOSED"
+        Float    entry_price
+        Float    stop_loss
+        Float    take_profit
+        Float    exit_price             "nullable — renseigné à la clôture"
+        Float    confidence
+        Float    risk_reward_ratio      "nullable"
+        String   patterns               "JSON array"
+        String   indicators             "JSON object"
+        DateTime closedAt              "nullable"
+        DateTime createdAt
+        DateTime updatedAt
+    }
+
+    Strategy {
+        String   id             PK
+        String   userId         FK
+        String   name
+        String   description        "nullable"
+        String   code
+        String   asset
+        String   timeframe          "15m | 1h | 4h | 1d"
+        String   status             "default: inactive"
+        Float    win_rate           "nullable"
+        Int      total_trades       "nullable"
+        Float    profit_factor      "nullable"
+        DateTime createdAt
+        DateTime updatedAt
+    }
+
+    Report {
+        String   id                      PK
+        String   userId                  FK
+        Int      month
+        Int      year
+        Int      total_signals
+        Int      buy_signals
+        Int      sell_signals
+        Int      hold_signals
+        Float    win_rate
+        Float    avg_confidence
+        Float    best_signal_confidence
+        Float    worst_signal_confidence
+        Float    total_pnl_estimate
+        Int      total_trades_expected
+        Int      high_confidence_signals
+        String   patterns_detected       "nullable — JSON"
+        String   indicators_used         "nullable — JSON"
+        String   summary                 "nullable"
+        DateTime createdAt
+        DateTime updatedAt
+    }
+
+    PortfolioSnapshot {
+        String   id         PK
+        String   userId     FK
+        Float    capital
+        Int      month          "1-12"
+        Int      year
+        DateTime createdAt
+    }
+
+    SimulationResult {
+        String   id          PK
+        String   userId      FK
+        String   asset
+        String   params          "JSON: initialAmount, monthlyInvestment, months…"
+        String   result          "JSON: totalInvested, finalBalance, roi…"
+        String   monthlyData     "nullable — JSON array pour replay"
+        DateTime createdAt
+    }
+
+    WebAuthnCredential {
+        String   id            PK
+        String   userId        FK
+        String   credentialId  UK  "base64url FIDO2"
+        String   publicKey         "base64url COSE key"
+        Int      counter
+        String   deviceType        "nullable — singleDevice | multiDevice"
+        Boolean  backedUp
+        String   transports        "nullable — JSON array"
+        String   aaguid            "nullable"
+        DateTime createdAt
+        DateTime lastUsedAt        "nullable"
+    }
+
+    AuthLog {
+        String   id         PK
+        String   userId         "nullable — tentatives non authentifiées"
+        String   action         "LOGIN | MAGIC_LINK | GITHUB | TOTP…"
+        String   result         "SUCCESS | FAILURE"
+        String   ip             "nullable"
+        String   detail         "nullable"
+        DateTime createdAt
+    }
+
+    %% ════════════════════════════════════════════════════════════
+    %% MODULE FORMATION
+    %% ════════════════════════════════════════════════════════════
+
+    Course {
+        String      id           PK
+        String      title
+        String      description
+        CourseLevel level            "DEBUTANT | INTERMEDIAIRE | AVANCE | EXPERT"
+        String      category
+        String      thumbnail        "nullable"
+        Int         duration         "minutes"
+        Int         totalLessons
+        Int         order
+        Boolean     isPublished
+        DateTime    createdAt
+    }
+
+    Lesson {
+        String     id           PK
+        String     courseId     FK
+        String     title
+        String     description
+        String     videoUrl         "nullable"
+        String     content
+        Int        duration         "minutes"
+        Int        order
+        LessonType type             "VIDEO | ARTICLE | QUIZ"
+        DateTime   createdAt
+    }
+
+    UserProgress {
+        String   id         PK
+        String   userId     FK
+        String   courseId   FK  "nullable"
+        String   lessonId   FK  "nullable"
+        Boolean  completed
+        Int      score          "nullable — score quiz"
+        DateTime createdAt
+        DateTime updatedAt
+    }
+
+    %% ════════════════════════════════════════════════════════════
+    %% ENTITÉS REDIS / EXTERNES (non persistées en base SQL)
+    %% ════════════════════════════════════════════════════════════
+
+    MagicLink_Redis {
+        String token    PK  "clé: magic:{uuid}"
+        String email        "valeur: adresse email"
+        Int    ttl          "TTL: 900s (15 min)"
+    }
+
+    RefreshToken_Redis {
+        String jti      PK  "clé: refresh:{jti}"
+        String userId       "valeur: userId"
+        Int    ttl          "TTL: 604800s (7 jours)"
+    }
+
+    MarketData_CoinGecko {
+        String   id                          "coin id ex: bitcoin"
+        String   symbol
+        String   name
+        Float    current_price
+        Float    price_change_percentage_24h
+        Float    total_volume
+        Float    market_cap
+        String   sparkline_in_7d             "JSON — 7 jours OHLC"
+    }
+
+    %% ════════════════════════════════════════════════════════════
+    %% RELATIONS
+    %% ════════════════════════════════════════════════════════════
+
+    %% User → relations directes (1-N)
+    User ||--o{ Signal             : "génère (1..N)"
+    User ||--o{ Strategy           : "crée (1..N)"
+    User ||--o{ Report             : "possède (1..N)"
+    User ||--o{ PortfolioSnapshot  : "snapshot mensuel (1..N)"
+    User ||--o{ SimulationResult   : "simule (1..N)"
+    User ||--o{ WebAuthnCredential : "enregistre clé FIDO2 (1..N)"
+    User ||--o{ UserProgress       : "progresse (1..N)"
+
+    %% Signal → Strategy (N-1 optionnel)
+    Strategy ||--o{ Signal : "source optionnelle (0..N)"
+
+    %% Formation (1-N)
+    Course ||--|{ Lesson       : "contient (1..N)"
+    Course ||--o{ UserProgress : "suivi par (0..N)"
+    Lesson ||--o{ UserProgress : "suivi par (0..N)"
+
+    %% Redis → User (logique, pas de FK SQL)
+    User ||--o{ MagicLink_Redis    : "token temporaire (Redis)"
+    User ||--o{ RefreshToken_Redis : "session active (Redis)"

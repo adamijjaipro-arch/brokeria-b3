@@ -287,5 +287,34 @@ describe('WebAuthnService', () => {
       // authenticatorSelection doit exiger userVerification required
       expect((result as any).authenticatorSelection?.userVerification).toBe('required');
     });
+
+    it('configure le bon rpId et rpName depuis les variables d\'environnement', async () => {
+      mockPrisma.user.findUnique.mockResolvedValue({
+        id: 'user1', email: 'test@example.com',
+        username: 'tester', webAuthnCredentials: [],
+      });
+
+      const result = await service.registrationOptions('user1');
+
+      expect((result as any).rp.id).toBe('localhost');
+      expect((result as any).rp.name).toBe('BrokerIA Test');
+    });
+  });
+
+  // ── removeCredential — propriété ──────────────────────────────────────────
+
+  describe('removeCredential — vérification ownership', () => {
+    it('ne supprime pas si le credential existe mais appartient à un autre user', async () => {
+      mockPrisma.webAuthnCredential.findUnique.mockResolvedValue({
+        ...MOCK_CREDENTIAL,
+        userId: 'adversaire',
+      });
+
+      await expect(
+        service.removeCredential('user1', 'cred-db-id', '1.2.3.4'),
+      ).rejects.toThrow(NotFoundException);
+
+      expect(mockPrisma.webAuthnCredential.delete).not.toHaveBeenCalled();
+    });
   });
 });

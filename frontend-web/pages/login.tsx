@@ -283,7 +283,7 @@ const Spinner = () => (
 );
 
 const ErrorBox = ({ message }: { message: string }) => (
-  <div style={{ background: 'rgba(239,68,68,0.08)', borderRadius: '10px', padding: '12px 14px', border: '1.5px solid rgba(239,68,68,0.20)', display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+  <div role="alert" aria-live="polite" style={{ background: 'rgba(239,68,68,0.08)', borderRadius: '10px', padding: '12px 14px', border: '1.5px solid rgba(239,68,68,0.20)', display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
     <span style={{ fontSize: '18px', flexShrink: 0 }}>⚠️</span>
     <div>
       <p style={{ fontSize: '13px', color: '#ef4444', margin: 0, fontWeight: 600 }}>Erreur</p>

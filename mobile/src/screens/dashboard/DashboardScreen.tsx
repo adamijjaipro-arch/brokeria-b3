@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_URL } from '../../constants/api';
 
 interface Signal {
   id: string;
   asset: string;
   direction: 'BUY' | 'SELL' | 'HOLD';
   confidence: number;
-  entryPrice: number;
-  stopLoss: number;
-  takeProfit: number;
+  entry_price: number;
+  stop_loss: number;
+  take_profit: number;
   createdAt: string;
 }
 
@@ -18,24 +19,26 @@ export default function DashboardScreen() {
   const [signals, setSignals] = useState<Signal[]>([]);
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchData();
   }, []);
 
   const fetchData = async () => {
+    setLoading(true);
+    setError(null);
     try {
       const token = await AsyncStorage.getItem('accessToken');
-      const signalsRes = await axios.get('http://localhost:3001/signals/recent', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const statsRes = await axios.get('http://localhost:3001/signals/statistics', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setSignals(signalsRes.data);
-      setStats(statsRes.data);
-    } catch (error) {
-      console.error('Failed to fetch', error);
+      const headers = { Authorization: `Bearer ${token}` };
+      const [signalsRes, statsRes] = await Promise.all([
+        axios.get(`${API_URL}/signals/recent`, { headers }),
+        axios.get(`${API_URL}/signals/statistics`, { headers }),
+      ]);
+      setSignals(signalsRes.data.data);
+      setStats(statsRes.data.data);
+    } catch (err: any) {
+      setError(err.message || 'Erreur réseau');
     } finally {
       setLoading(false);
     }
@@ -45,6 +48,17 @@ export default function DashboardScreen() {
     return (
       <View style={styles.container}>
         <ActivityIndicator size="large" color="#3b82f6" />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <Text style={styles.errorText}>❌ {error}</Text>
+        <TouchableOpacity style={styles.retryButton} onPress={fetchData}>
+          <Text style={styles.retryText}>Réessayer</Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -87,15 +101,15 @@ export default function DashboardScreen() {
             <View style={styles.signalDetails}>
               <View>
                 <Text style={styles.detailLabel}>Entry</Text>
-                <Text style={styles.detailValue}>${item.entryPrice.toFixed(2)}</Text>
+                <Text style={styles.detailValue}>${item.entry_price.toFixed(2)}</Text>
               </View>
               <View>
                 <Text style={styles.detailLabel}>SL</Text>
-                <Text style={styles.detailValue}>${item.stopLoss.toFixed(2)}</Text>
+                <Text style={styles.detailValue}>${item.stop_loss.toFixed(2)}</Text>
               </View>
               <View>
                 <Text style={styles.detailLabel}>TP</Text>
-                <Text style={styles.detailValue}>${item.takeProfit.toFixed(2)}</Text>
+                <Text style={styles.detailValue}>${item.take_profit.toFixed(2)}</Text>
               </View>
               <View>
                 <Text style={styles.detailLabel}>Confidence</Text>
@@ -114,6 +128,23 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#0f172a',
     padding: 16,
+  },
+  errorText: {
+    color: '#ef4444',
+    fontSize: 16,
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  retryButton: {
+    backgroundColor: '#f59e0b',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  retryText: {
+    color: '#ffffff',
+    fontWeight: 'bold',
+    fontSize: 14,
   },
   statsGrid: {
     flexDirection: 'row',

@@ -158,7 +158,7 @@ const ImportStrategyPage: NextPage = () => {
               onDragOver={(e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragging(true); }}
               onDragLeave={() => setIsDragging(false)}
               onClick={() => fileInputRef.current?.click()}
-              onKeyDown={(e) => e.key === 'Enter' && fileInputRef.current?.click()}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInputRef.current?.click(); } }}
               style={{
                 border:       `2px dashed ${isDragging ? '#3b82f6' : file ? '#22c55e' : '#333333'}`,
                 borderRadius: '12px',
@@ -184,7 +184,7 @@ const ImportStrategyPage: NextPage = () => {
                     Glissez votre fichier ici ou{' '}
                     <span style={{ color: '#3b82f6', textDecoration: 'underline' }}>parcourir</span>
                   </p>
-                  <p style={{ fontSize: '12px', color: '#555555', margin: 0 }}>PDF, TXT, MD — max 10 Mo</p>
+                  <p style={{ fontSize: '12px', color: '#9ca3af', margin: 0 }}>PDF, TXT, MD — max 10 Mo</p>
                 </>
               )}
             </div>

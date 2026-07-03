@@ -27,3 +27,16 @@ Thumbs.db
 
 # Temp files
 html-to-pdf.js
+
+# Python compiled files
+__pycache__/
+*.pyc
+*.pyo
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# TypeScript build info
+*.tsbuildinfo

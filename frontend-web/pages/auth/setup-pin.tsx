@@ -93,7 +93,7 @@ const SetupPinPage: NextPage = () => {
             </div>
 
             {error && (
-              <div style={{ background: '#fef2f2', borderRadius: '10px', padding: '12px 14px', border: '1px solid #fecaca' }}>
+              <div role="alert" aria-live="polite" style={{ background: '#fef2f2', borderRadius: '10px', padding: '12px 14px', border: '1px solid #fecaca' }}>
                 <p style={{ fontSize: '13px', color: '#dc2626', margin: 0, fontWeight: 500 }}>{error}</p>
               </div>
             )}

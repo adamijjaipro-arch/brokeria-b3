@@ -218,6 +218,24 @@ describe('TotpService', () => {
       );
       expect(mockLogging.mfaRevoked).toHaveBeenCalledWith('user1', 'totp', '127.0.0.1');
     });
+
+    it('lève UnauthorizedException si le code TOTP fourni est invalide', async () => {
+      const secret = authenticator.generateSecret();
+      const encryptedSecret = (service as unknown as { encrypt(s: string): string }).encrypt(secret);
+
+      mockPrisma.user.findUnique.mockResolvedValue({
+        id: 'user1',
+        totpEnabled: true,
+        totpSecret: encryptedSecret,
+      });
+
+      await expect(
+        service.disable('user1', '000000', '127.0.0.1'),
+      ).rejects.toThrow(UnauthorizedException);
+
+      expect(mockPrisma.user.update).not.toHaveBeenCalled();
+      expect(mockLogging.authFailure).toHaveBeenCalled();
+    });
   });
 
   // ── Chiffrement AES-256-GCM ────────────────────────────────────────────────

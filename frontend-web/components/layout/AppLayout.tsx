@@ -199,7 +199,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, title, subtitle }) => {
         </div>
 
         {/* Nav label */}
-        <p style={{ margin: '0 0 8px', padding: '0 20px', fontSize: '11px', fontWeight: 700, color: '#4b5563', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+        <p style={{ margin: '0 0 8px', padding: '0 20px', fontSize: '11px', fontWeight: 700, color: '#9ca3af', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
           Navigation
         </p>
 
@@ -222,7 +222,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, title, subtitle }) => {
                   <span style={{ fontSize: '13px', fontWeight: 600, marginTop: '6px' }}>{item.label}</span>
                   <span style={{
                     position: 'absolute', top: '10px', right: '16px',
-                    fontSize: '9px', fontWeight: 700, color: '#4b5563',
+                    fontSize: '9px', fontWeight: 700, color: '#9ca3af',
                     background: '#1f2937', padding: '2px 6px', borderRadius: '4px',
                   }}>Bientôt</span>
                 </div>
@@ -236,7 +236,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, title, subtitle }) => {
                   padding: '16px 8px', borderRadius: '16px', cursor: 'pointer',
                   position: 'relative',
                   background: isActive ? '#2563eb' : 'transparent',
-                  color: isActive ? '#ffffff' : '#6b7280',
+                  color: isActive ? '#ffffff' : '#9ca3af',
                   transition: 'all 0.15s ease',
                 }}>
                   {item.icon}
@@ -257,13 +257,15 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, title, subtitle }) => {
 
         {/* User footer */}
         <div style={{ padding: '16px', borderTop: '1px solid #161b22' }}>
-          <div
+          <button
             onClick={handleLogout}
-            title="Se déconnecter"
+            aria-label="Se déconnecter"
             style={{
               display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px',
               borderRadius: '12px', cursor: 'pointer',
               transition: 'background 0.15s',
+              background: 'transparent', border: 'none', width: '100%',
+              font: 'inherit', textAlign: 'left',
             }}
             onMouseEnter={e => (e.currentTarget.style.background = '#161b22')}
             onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
@@ -280,12 +282,12 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, title, subtitle }) => {
               <p style={{ margin: 0, fontSize: '13px', fontWeight: 600, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {displayName}
               </p>
-              <p style={{ margin: 0, fontSize: '11px', color: '#4b5563' }}>Se déconnecter</p>
+              <p style={{ margin: 0, fontSize: '11px', color: '#9ca3af' }}>Se déconnecter</p>
             </div>
-            <svg width="14" height="14" fill="none" stroke="#4b5563" viewBox="0 0 24 24">
+            <svg width="14" height="14" fill="none" stroke="#9ca3af" viewBox="0 0 24 24" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
-          </div>
+          </button>
         </div>
       </aside>
 
@@ -299,11 +301,12 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, title, subtitle }) => {
           background: '#111111', borderBottom: '1px solid #1F1F1F',
         }}>
           <div style={{ position: 'relative', flex: 1, maxWidth: '320px' }}>
-            <svg style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#555555' }} width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg aria-hidden="true" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#555555' }} width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
             <input
               type="text"
+              aria-label="Rechercher"
               placeholder="Rechercher..."
               style={{
                 width: '100%', padding: '8px 12px 8px 36px', border: '1px solid #1F1F1F',
@@ -316,14 +319,16 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, title, subtitle }) => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: 'auto' }}>
             <ThemeToggleButton />
             {/* Notifications */}
-            <button style={{
-              position: 'relative', padding: '8px', background: 'transparent',
-              border: 'none', borderRadius: '10px', cursor: 'pointer', color: '#888888',
-            }}>
-              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button
+              aria-label="Notifications (12 nouveaux signaux)"
+              style={{
+                position: 'relative', padding: '8px', background: 'transparent',
+                border: 'none', borderRadius: '10px', cursor: 'pointer', color: '#888888',
+              }}>
+              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
               </svg>
-              <span style={{ position: 'absolute', top: '6px', right: '6px', width: '8px', height: '8px', background: '#ef4444', borderRadius: '50%', border: '2px solid #111111' }} />
+              <span aria-hidden="true" style={{ position: 'absolute', top: '6px', right: '6px', width: '8px', height: '8px', background: '#ef4444', borderRadius: '50%', border: '2px solid #111111' }} />
             </button>
 
             {/* User chip */}

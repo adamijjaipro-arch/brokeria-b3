@@ -146,7 +146,7 @@ export default function TotpSetupPage() {
             />
 
             {error && (
-              <p className="text-red-400 text-sm text-center bg-red-900/20 rounded-lg py-2 px-4">
+              <p role="alert" aria-live="polite" className="text-red-400 text-sm text-center bg-red-900/20 rounded-lg py-2 px-4">
                 {error}
               </p>
             )}

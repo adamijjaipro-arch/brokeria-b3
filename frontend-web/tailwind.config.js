@@ -39,7 +39,7 @@ module.exports = {
         text: {
           primary:   '#FFFFFF',
           secondary: '#888888',
-          muted:     '#666666',
+          muted:     '#9ca3af', // WCAG AA (4.5:1) sur fond #0A0A0A/#111111 — #666666 échouait (3.45:1)
         },
         border: {
           DEFAULT: '#1F1F1F',
@@ -71,7 +71,7 @@ module.exports = {
           hover:  '#161b22',
           active: '#2563eb',
           text:   '#e5e7eb',
-          muted:  '#6b7280',
+          muted:  '#9ca3af', // WCAG AA (7.45:1) sur #0d1117 — #6b7280 échouait (3.92:1)
         },
         surface: {
           page:  '#0A0A0A',
@@ -81,7 +81,7 @@ module.exports = {
         ink: {
           DEFAULT:   '#FFFFFF',
           secondary: '#888888',
-          muted:     '#666666',
+          muted:     '#9ca3af', // WCAG AA (4.5:1) — #666666 échouait (3.45:1)
         },
       },
       boxShadow: {

@@ -46,7 +46,7 @@ export default function TotpVerifyPage() {
             <span className="text-3xl">📱</span>
           </div>
           <h1 className="text-2xl font-bold text-white">Code TOTP</h1>
-          <p className="mt-2 text-gray-400 text-sm">
+          <p id="totp-help-text" className="mt-2 text-gray-400 text-sm">
             Saisissez le code de votre application d&apos;authentification
           </p>
         </div>
@@ -58,6 +58,7 @@ export default function TotpVerifyPage() {
             pattern="[0-9]{6}"
             maxLength={6}
             value={code}
+            aria-describedby="totp-help-text"
             onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
             placeholder="000000"
             className="w-full text-center text-3xl tracking-[0.5em] font-mono py-4 bg-gray-800 border border-gray-700 rounded-xl text-white focus:outline-none focus:border-indigo-500 transition-colors"
@@ -65,7 +66,7 @@ export default function TotpVerifyPage() {
           />
 
           {error && (
-            <p className="text-red-400 text-sm text-center bg-red-900/20 rounded-lg py-2 px-4">
+            <p role="alert" aria-live="polite" className="text-red-400 text-sm text-center bg-red-900/20 rounded-lg py-2 px-4">
               {error}
             </p>
           )}

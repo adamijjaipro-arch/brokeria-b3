@@ -114,4 +114,31 @@ describe('LoggingService', () => {
     expect(mockPrisma.authLog.create).toHaveBeenCalled();
     spy.mockRestore();
   });
+
+  it('authSuccess passe le facteur d\'authentification dans les données persistées', async () => {
+    await service.authSuccess('user6', 'webauthn', '10.0.0.1');
+
+    expect(mockPrisma.authLog.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          action: 'AUTH_SUCCESS',
+          result: 'success',
+          userId: 'user6',
+        }),
+      }),
+    );
+  });
+
+  it('authFailure passe bien le détail de l\'erreur dans les données persistées', async () => {
+    await service.authFailure('user7', 'totp', '2.3.4.5', undefined, 'OTP expiré');
+
+    expect(mockPrisma.authLog.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          action: 'AUTH_FAILURE',
+          result: 'failure',
+        }),
+      }),
+    );
+  });
 });

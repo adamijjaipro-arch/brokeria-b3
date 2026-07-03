@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { View, TextInput, TouchableOpacity, Text, StyleSheet, Alert } from 'react-native';
 import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAuth } from '../../hooks/useAuth';
+import { API_URL } from '../../constants/api';
 
 export default function LoginScreen({ navigation }: any) {
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -16,19 +18,14 @@ export default function LoginScreen({ navigation }: any) {
 
     setLoading(true);
     try {
-      const response = await axios.post('http://localhost:3001/auth/login', {
+      const response = await axios.post('`${API_URL}/auth/login`', {
         email,
         password,
       });
 
-      const { accessToken, refreshToken } = response.data;
-      await AsyncStorage.setItem('accessToken', accessToken);
-      await AsyncStorage.setItem('refreshToken', refreshToken);
-
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'Main' }],
-      });
+      const { accessToken } = response.data.data;
+      await login(accessToken);
+      // RootNavigator automatically switches to AppStack when isLoggedIn becomes true
     } catch (error: any) {
       Alert.alert('Login Failed', error.response?.data?.message || 'Invalid credentials');
     } finally {

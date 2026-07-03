@@ -1,0 +1,1007 @@
+{
+  "project": {
+    "name": "Alvio / BrokerIA",
+    "stack": {
+      "backend":  "NestJS 10 + Prisma + PostgreSQL + Redis",
+      "frontend": "Next.js 13.4 (Pages Router) + Zustand + TailwindCSS",
+      "mobile":   "React Native (Expo)",
+      "ia":       "Python 3 (pandas, numpy, scikit-signals)",
+      "infra":    "Docker Compose (postgres:15-alpine + redis:7-alpine)"
+    },
+    "ports": { "backend": 3001, "frontend": 3000 },
+    "modules_backend": [
+      "auth","signals","strategies","reports","markets","portfolio",
+      "simulator","formation","ai","patterns","mfa/totp","mfa/webauthn",
+      "metrics","logging","email","redis","database"
+    ]
+  },
+
+  "backlog": {
+    "cdc-01": {
+      "title": "Authentification multi-facteur",
+      "files_impacted": [
+        "backend-code/src/auth/",
+        "backend-code/src/mfa/totp/",
+        "backend-code/src/mfa/webauthn/",
+        "backend-code/prisma/schema.prisma"
+      ],
+      "features": [
+        "Email + password (bcrypt)",
+        "GitHub OAuth",
+        "Magic link (email SMTP)",
+        "TOTP RFC 6238 (AES-256-GCM)",
+        "PIN (3ème facteur)",
+        "WebAuthn FIDO2 (passkeys)",
+        "Account lockout Redis",
+        "JWT access 15min + refresh cookie 7j"
+      ],
+      "tasks": [
+        "Valider flux auth complet (register → MFA → JWT)",
+        "Tester lockout après 3 échecs",
+        "Tester magic link TTL 15min",
+        "Valider refresh token rotation"
+      ]
+    },
+    "cdc-02": {
+      "title": "Signaux de trading IA",
+      "files_impacted": [
+        "backend-code/src/signals/",
+        "backend-code/src/patterns/",
+        "ai-module/signal_generator.py",
+        "ai-module/pattern_detector.py"
+      ],
+      "features": [
+        "Génération signal (IA) via Claude API",
+        "Scan automatique cron (signal-scheduler.service.ts)",
+        "Détection patterns Python subprocess",
+        "Notification email si signal généré"
+      ],
+      "tasks": [
+        "Valider pipeline génération signal end-to-end",
+        "Tester patterns Python (candlestick, chart, harmonique)",
+        "Valider scoring confidence 0-100",
+        "Tester cron scan toutes les stratégies actives"
+      ]
+    },
+    "cdc-03": {
+      "title": "Stratégies & Claude API",
+      "files_impacted": [
+        "backend-code/src/strategies/",
+        "backend-code/src/ai/",
+        "ai-module/nlp_rule_extractor.py"
+      ],
+      "features": [
+        "Import stratégie PDF/TXT/MD (multer 10MB)",
+        "Extraction règles via Claude API (claude-sonnet-4-6)",
+        "Analyse stratégie existante via Claude",
+        "CRUD stratégies utilisateur"
+      ],
+      "tasks": [
+        "Tester import PDF → extraction JSON StrategyRules",
+        "Valider réponse Claude API dans AIService.analyzeStrategyDocument()",
+        "Tester analyse stratégie avec données historiques"
+      ]
+    },
+    "cdc-04": {
+      "title": "Marchés & Portfolio",
+      "files_impacted": [
+        "backend-code/src/markets/",
+        "backend-code/src/portfolio/",
+        "backend-code/src/simulator/"
+      ],
+      "features": [
+        "Top 20 crypto CoinGecko (cache Redis 60s)",
+        "Détail coin (cache 30s)",
+        "OHLCV candles (cache variable)",
+        "Snapshot portfolio mensuel (cron)",
+        "Simulateur DCA Monte Carlo"
+      ],
+      "tasks": [
+        "Valider cache Redis CoinGecko",
+        "Tester simulation Monte Carlo 240 mois",
+        "Valider cron snapshot portfolio"
+      ]
+    },
+    "cdc-05": {
+      "title": "Formation & Rapports",
+      "files_impacted": [
+        "backend-code/src/formation/",
+        "backend-code/src/reports/",
+        "backend-code/prisma/schema.prisma"
+      ],
+      "features": [
+        "Cours par niveau (DEBUTANT|INTERMEDIAIRE|AVANCE|EXPERT)",
+        "Leçons VIDEO|ARTICLE|QUIZ",
+        "Progression utilisateur (UserProgress)",
+        "Rapport mensuel performance (win rate, PnL estimé)"
+      ],
+      "tasks": [
+        "Valider enrollment cours complet",
+        "Tester marquage leçon complète (score pour QUIZ)",
+        "Valider rapport mensuel agrégation"
+      ]
+    }
+  },
+
+  "conception": {
+    "conc-01": {
+      "title": "Architecture générale Alvio",
+      "files": [
+        "backend-code/src/main.ts",
+        "backend-code/src/app.module.ts",
+        "docker-compose.yml",
+        "backend-code/prisma/schema.prisma"
+      ],
+      "decisions": [
+        "Global prefix: /api (implicite via routes)",
+        "Global guard: JwtAuthGuard ou JwtGuard selon module",
+        "Response wrapping: TransformInterceptor → { data: T }",
+        "Error format: HttpExceptionFilter → { statusCode, timestamp, message }",
+        "Cookie Parser: requis pour refresh_token httpOnly",
+        "ValidationPipe: transform enabled",
+        "CORS origins: localhost:3000, localhost:3006"
+      ],
+      "tasks": [
+        "Diagramme architecture C4 Level 2",
+        "Valider stack docker-compose (postgres + redis)",
+        "Documenter flux inter-modules"
+      ]
+    },
+    "conc-02": {
+      "title": "Schéma base de données (11 tables, 2 enums)",
+      "files": [
+        "backend-code/prisma/schema.prisma",
+        "MPD.sql",
+        "diagrams/MPD_ALVIO.png"
+      ],
+      "models": [
+        "User (hub central, 7 relations sortantes)",
+        "Signal (strategyId: index sans FK - intentionnel)",
+        "Strategy",
+        "Report (UNIQUE userId+month+year)",
+        "PortfolioSnapshot (UNIQUE userId+month+year)",
+        "SimulationResult",
+        "WebAuthnCredential (UNIQUE credentialId)",
+        "AuthLog (userId NULL sans FK - capture tentatives anonymes)",
+        "Course",
+        "Lesson",
+        "UserProgress (UNIQUE userId+lessonId, pivot table)"
+      ],
+      "enums": ["CourseLevel", "LessonType"],
+      "tasks": [
+        "Valider MPD_ALVIO.png (physique)",
+        "Valider MLD_ALVIO.png (logique)",
+        "Exécuter npx prisma db push",
+        "Vérifier tous les indexes composite Signal"
+      ]
+    },
+    "conc-03": {
+      "title": "Flux authentification complet",
+      "files": [
+        "backend-code/src/auth/auth.service.ts",
+        "backend-code/src/auth/auth.controller.ts",
+        "backend-code/src/mfa/totp/totp.service.ts",
+        "backend-code/src/mfa/webauthn/webauthn.service.ts",
+        "backend-code/src/redis/redis.service.ts"
+      ],
+      "flow_steps": [
+        "POST /auth/register → hash bcrypt → preAuthToken Redis 10min",
+        "POST /auth/login → verify password → preAuthToken Redis 10min",
+        "POST /auth/2fa/verify → TOTP/OTP email → pinAuthToken ou JWT final",
+        "POST /auth/pin/verify → PIN → accessToken 15min + refresh cookie 7j",
+        "POST /auth/refresh → rotate refresh Redis → nouveau accessToken",
+        "GET /auth/github → GitHub OAuth → POST /auth/github/callback",
+        "POST /auth/magic-link/request → email SMTP → token Redis 15min",
+        "POST /auth/magic-link/verify → JWT final"
+      ],
+      "tasks": [
+        "Diagramme séquence auth email/password + MFA",
+        "Diagramme séquence GitHub OAuth",
+        "Diagramme séquence magic link"
+      ]
+    }
+  },
+
+  "implementation": {
+    "backend": {
+      "impl-01-setup": {
+        "title": "Setup Docker + Prisma + NestJS bootstrap",
+        "files": [
+          "docker-compose.yml",
+          "backend-code/src/main.ts",
+          "backend-code/src/app.module.ts",
+          "backend-code/prisma/schema.prisma",
+          "backend-code/.env"
+        ],
+        "env_required": [
+          "DATABASE_URL", "JWT_SECRET", "REDIS_URL",
+          "CORS_ORIGINS", "PORT=3001"
+        ],
+        "subtasks": [
+          "☑ Docker Compose postgres:15-alpine + redis:7-alpine",
+          "☑ Prisma schema défini (11 tables, 2 enums)",
+          "☑ npx prisma db push (non-interactif)",
+          "☐ npx prisma db seed (données formation, cours, leçons)",
+          "☑ NestJS boot port 3001",
+          "☑ Cookie Parser + ValidationPipe + Interceptors globaux",
+          "☐ Swagger /api/docs configurer"
+        ]
+      },
+      "impl-02-auth": {
+        "title": "Authentification JWT + TOTP + WebAuthn",
+        "files": [
+          "backend-code/src/auth/auth.controller.ts",
+          "backend-code/src/auth/auth.service.ts",
+          "backend-code/src/auth/dto/",
+          "backend-code/src/mfa/totp/totp.controller.ts",
+          "backend-code/src/mfa/totp/totp.service.ts",
+          "backend-code/src/mfa/webauthn/webauthn.controller.ts",
+          "backend-code/src/mfa/webauthn/webauthn.service.ts",
+          "backend-code/src/redis/redis.service.ts",
+          "backend-code/src/logging/logging.service.ts"
+        ],
+        "routes_count": 14,
+        "controller_routes": [
+          "POST   /auth/register          → register()          [public]",
+          "POST   /auth/login             → login()             [public]",
+          "POST   /auth/magic-link/request→ requestMagicLink()  [public]",
+          "POST   /auth/magic-link/verify → verifyMagicLink()   [public]",
+          "GET    /auth/github            → githubLogin()       [AuthGuard('github')]",
+          "GET    /auth/github/callback   → githubCallback()    [AuthGuard('github')]",
+          "POST   /auth/2fa/verify        → verify2FA()         [public]",
+          "POST   /auth/pin/verify        → verifyPin()         [public]",
+          "POST   /auth/pin/setup         → setupPin()          [public]",
+          "POST   /auth/set-password      → setPassword()       [public]",
+          "POST   /auth/refresh           → refresh()           [public]",
+          "POST   /auth/logout            → logout()            [public]",
+          "POST   /auth/dev-login         → devLogin()          [public]",
+          "GET    /auth/profile           → getProfile()        [JwtAuthGuard]"
+        ],
+        "mfa_totp_routes": [
+          "GET    /mfa/totp/status        → getStatus()         [JwtAuthGuard]",
+          "POST   /mfa/totp/enroll/init   → enrollInit()        [JwtAuthGuard]",
+          "POST   /mfa/totp/enroll/confirm→ enrollConfirm()     [JwtAuthGuard]",
+          "POST   /mfa/totp/verify        → verify()            [JwtAuthGuard]",
+          "POST   /mfa/totp/disable       → disable()           [JwtAuthGuard]"
+        ],
+        "mfa_webauthn_routes": [
+          "GET    /mfa/webauthn/credentials        → listCredentials()       [JwtAuthGuard]",
+          "POST   /mfa/webauthn/register/options   → registrationOptions()   [JwtAuthGuard]",
+          "POST   /mfa/webauthn/register/verify    → registrationVerify()    [JwtAuthGuard]",
+          "POST   /mfa/webauthn/auth/options       → authenticationOptions() [JwtAuthGuard]",
+          "POST   /mfa/webauthn/auth/verify        → authenticationVerify()  [JwtAuthGuard]",
+          "DELETE /mfa/webauthn/credentials/:id    → removeCredential()      [JwtAuthGuard]"
+        ],
+        "dto_classes": [
+          "RegisterDto:      { email, username, password (min 6) }",
+          "LoginDto:         { email, password }",
+          "Verify2FADto:     { preAuthToken, otp }",
+          "VerifyPinDto:     { pinAuthToken, pin }",
+          "SetupPinDto:      { pinAuthToken, pin }",
+          "SetPasswordDto:   { preAuthToken, password }",
+          "MagicLinkDto:     { email | token }",
+          "VerifyTotpDto:    { code (6 digits exactly) }",
+          "DisableTotpDto:   { code (6 digits exactly) }"
+        ],
+        "redis_keys": [
+          "pre_auth:{token}    → userId | TTL 10min",
+          "pin_auth:{token}    → userId | TTL 10min",
+          "magic:{token}       → email  | TTL 15min",
+          "refresh:{jti}       → userId | TTL 7 jours",
+          "lockout:{userId}    → count  | TTL LOCK_TTL_SECONDS",
+          "ip_fail:{ip}        → count  | TTL configurable"
+        ],
+        "subtasks": [
+          "☑ AuthService.register() + bcrypt hash",
+          "☑ AuthService.login() → preAuthToken Redis",
+          "☑ AuthService.verify2FA() → TOTP/OTP email",
+          "☑ AuthService.refresh() → rotation refresh Redis",
+          "☑ GitHub OAuth Strategy (Passport)",
+          "☑ Magic link flow (SMTP + Redis TTL)",
+          "☑ Account lockout (MAX_AUTH_FAILURES=3, LOCK_TTL=1800s)",
+          "☑ IP failure tracking (MAX_IP_FAILURES=10)",
+          "☑ AuthLog persist (3-channel: DB + console + UDP Syslog)",
+          "☑ TotpService AES-256-GCM encrypted secret",
+          "☑ WebAuthnService @simplewebauthn/server",
+          "☐ Tester flux complet avec Postman/Thunder"
+        ]
+      },
+      "impl-03-strategies": {
+        "title": "Strategies Module (CRUD + Claude API)",
+        "files": [
+          "backend-code/src/strategies/strategies.controller.ts",
+          "backend-code/src/strategies/strategies.service.ts",
+          "backend-code/src/strategies/dto/import-strategy.dto.ts",
+          "backend-code/src/ai/ai.service.ts",
+          "backend-code/src/ai/ai.controller.ts"
+        ],
+        "routes_count": 3,
+        "controller_routes": [
+          "GET    /strategies               → findAll()        [JwtGuard]",
+          "POST   /strategies/:id/analyze   → analyze()        [JwtGuard]",
+          "POST   /strategies/import        → importStrategy() [JwtGuard + FileInterceptor(10MB)]"
+        ],
+        "ai_routes": [
+          "POST   /api/ai/analyze-strategy  → analyzeStrategy()    [JwtGuard]",
+          "POST   /api/ai/detect-patterns   → detectPatterns()     [JwtGuard]",
+          "POST   /api/ai/generate-signal   → generateSignal()     [JwtGuard]",
+          "GET    /api/ai/patterns/:asset   → getPatternsHistory()  [JwtGuard]",
+          "GET    /api/ai/signals/asset/:asset → getSignalsForAsset() [JwtGuard]",
+          "POST   /api/ai/backtest          → backtestStrategy()   [JwtGuard]",
+          "GET    /api/ai/health            → checkAIHealth()      [JwtGuard]"
+        ],
+        "dto_classes": [
+          "ImportStrategyDto: { name, description?, timeframe (1m|5m|15m|1h|4h|1D), asset? }"
+        ],
+        "claude_integration": {
+          "model":  "claude-sonnet-4-6",
+          "method": "AIService.analyzeStrategyDocument(text: string) → StrategyRules",
+          "input":  "Texte extrait du PDF/TXT/MD (multer buffer)",
+          "output": "JSON StrategyRules (entry/exit conditions, risk management)"
+        },
+        "subtasks": [
+          "☑ StrategiesService.findAllByUser()",
+          "☑ StrategiesService.analyzeById() → Claude API",
+          "☑ StrategiesService.importFromDocument() → multer → Claude",
+          "☑ AIService.analyzeStrategyDocument() → StrategyRules JSON",
+          "☐ Tester import PDF 10MB",
+          "☐ Valider extraction règles complexes via Claude"
+        ]
+      },
+      "impl-04-signals": {
+        "title": "Signals & Trading + Python Bridge",
+        "files": [
+          "backend-code/src/signals/signals.controller.ts",
+          "backend-code/src/signals/signals.service.ts",
+          "backend-code/src/signals/signal-scheduler.service.ts",
+          "backend-code/src/signals/dto/create-signal.dto.ts",
+          "backend-code/src/signals/dto/generate-signal.dto.ts",
+          "backend-code/src/patterns/patterns.controller.ts",
+          "backend-code/src/patterns/pattern-detection.service.ts",
+          "ai-module/pattern_detector.py"
+        ],
+        "routes_count": 6,
+        "controller_routes": [
+          "GET    /signals             → getSignals()          [JwtGuard]",
+          "GET    /signals/recent      → getRecentSignals()    [JwtGuard]",
+          "POST   /signals             → createSignal()        [JwtGuard]",
+          "GET    /signals/statistics  → getSignalsStatistics()[JwtGuard]",
+          "POST   /signals/generate    → generateSignal()      [JwtGuard]",
+          "POST   /signals/scan-now    → scanNow()             [JwtGuard]"
+        ],
+        "patterns_routes": [
+          "GET    /patterns/detect     → detect()             [JwtAuthGuard]",
+          "   query: ?strategyId=&asset=&timeframe="
+        ],
+        "dto_classes": [
+          "CreateSignalDto:   { asset, direction(BUY|SELL|HOLD), confidence(0-100), entryPrice, stopLoss, takeProfit, detectedPatterns?, indicators? }",
+          "GenerateSignalDto: { strategyId, asset, timeframe, mockResult? }"
+        ],
+        "python_bridge": {
+          "file":    "ai-module/pattern_detector.py",
+          "caller":  "PatternDetectionService.detectPattern() → child_process.spawn()",
+          "input":   "JSON { strategy, ohlcv_data }",
+          "output":  "PatternDetectionResult { global_status(ENTRY_SIGNAL|EXIT_SIGNAL|NO_SIGNAL), confidence_score, indicators }",
+          "flow": [
+            "1. Backend fetch OHLCV CoinGecko",
+            "2. Spawn python pattern_detector.py",
+            "3. Python: candlestick + chart + harmonic + Elliott + Ichimoku",
+            "4. Python: ScoringEngine → confidence_score",
+            "5. Return PatternDetectionResult to NestJS"
+          ]
+        },
+        "subtasks": [
+          "☑ SignalsService.getUserSignals()",
+          "☑ SignalsService.getRecentSignals()",
+          "☑ SignalsService.createSignal()",
+          "☑ SignalsService.getSignalsStatistics()",
+          "☑ SignalsService.generateSignal() → Python bridge",
+          "☑ SignalSchedulerService (cron scan stratégies actives)",
+          "☑ PatternDetectionService.detectPattern() → subprocess Python",
+          "☐ Tester génération signal BTC/1h end-to-end",
+          "☐ Valider notification email après signal"
+        ]
+      },
+      "impl-05-reports": {
+        "title": "Reports mensuels (agrégation KPI)",
+        "files": [
+          "backend-code/src/reports/reports.controller.ts",
+          "backend-code/src/reports/reports.service.ts"
+        ],
+        "routes_count": 1,
+        "controller_routes": [
+          "GET    /reports/monthly/:year/:month → getMonthlyStats() [JwtGuard]"
+        ],
+        "monthly_stats_fields": [
+          "year, month",
+          "total_signals, buy_signals, sell_signals, hold_signals",
+          "win_rate, avg_confidence",
+          "best_signal_confidence, worst_signal_confidence",
+          "total_pnl_estimate, total_trades_expected",
+          "high_confidence_signals (>= 75%)",
+          "patterns_detected (Record<string,number>)",
+          "indicators_used (string[])",
+          "summary (text)"
+        ],
+        "subtasks": [
+          "☑ ReportsService.getMonthlyStats() → agrégation Prisma",
+          "☐ Vérifier unique constraint Report(userId,month,year)",
+          "☐ Tester rapport mois sans signaux (0 values)"
+        ]
+      },
+      "impl-06-markets": {
+        "title": "Données de marché CoinGecko + Redis cache",
+        "files": [
+          "backend-code/src/markets/markets.controller.ts",
+          "backend-code/src/markets/markets.service.ts",
+          "backend-code/src/redis/redis.service.ts"
+        ],
+        "routes_count": 3,
+        "controller_routes": [
+          "GET    /markets/top              → getTop()          [JwtAuthGuard]",
+          "GET    /markets/detail/:coinId   → getDetail()       [JwtAuthGuard]",
+          "GET    /markets/ohlcv/:coinId    → getOhlcv()        [JwtAuthGuard] ?days=14"
+        ],
+        "cache_ttl": {
+          "top_coins":    "60 secondes",
+          "coin_detail":  "30 secondes",
+          "ohlcv_1d":     "60 secondes",
+          "ohlcv_90d+":   "30 minutes"
+        },
+        "data_source": "CoinGecko API (fallback SSL dev)",
+        "subtasks": [
+          "☑ MarketsService.getTopCoins() → cache Redis 60s",
+          "☑ MarketsService.getCoinDetail() → cache 30s",
+          "☑ MarketsService.getOhlcv() → cache variable",
+          "☐ Tester cache miss → CoinGecko → cache fill",
+          "☐ Tester rate limit CoinGecko"
+        ]
+      },
+      "impl-07-portfolio": {
+        "title": "Portfolio + Simulateur DCA Monte Carlo",
+        "files": [
+          "backend-code/src/portfolio/portfolio.controller.ts",
+          "backend-code/src/portfolio/portfolio.service.ts",
+          "backend-code/src/portfolio/portfolio.scheduler.ts",
+          "backend-code/src/simulator/simulator.controller.ts",
+          "backend-code/src/simulator/simulator.service.ts"
+        ],
+        "portfolio_routes": [
+          "GET    /portfolio/history  → getHistory()  [JwtGuard]",
+          "GET    /portfolio/stats    → getStats()    [JwtGuard]"
+        ],
+        "simulator_routes": [
+          "POST   /simulator/dca      → simulateDCA()  [JwtGuard]",
+          "GET    /simulator/history  → getHistory()   [JwtGuard]"
+        ],
+        "dca_dto": {
+          "class": "DCASimulatorDto",
+          "fields": [
+            "asset: string",
+            "initialAmount: number",
+            "monthlyInvestment: number",
+            "months: number (1-240)",
+            "annualReturn: number (-50 to 100%)",
+            "volatility: number (0-100%)",
+            "mode?: 'monte_carlo' | 'fixed'"
+          ]
+        },
+        "subtasks": [
+          "☑ PortfolioService.getHistory()",
+          "☑ PortfolioService.getStats()",
+          "☑ PortfolioScheduler (cron snapshot mensuel)",
+          "☑ SimulatorService.simulateDCA() Monte Carlo",
+          "☑ SimulatorService.getHistory()",
+          "☐ Tester simulation 240 mois Monte Carlo",
+          "☐ Valider unique constraint PortfolioSnapshot(userId,month,year)"
+        ]
+      },
+      "impl-08-formation": {
+        "title": "Formation (cours + leçons + progression)",
+        "files": [
+          "backend-code/src/formation/formation.controller.ts",
+          "backend-code/src/formation/formation.service.ts"
+        ],
+        "routes_count": 5,
+        "controller_routes": [
+          "GET    /formation/courses           → getCourses()          [JwtGuard]",
+          "GET    /formation/courses/:id       → getCourseById()       [JwtGuard]",
+          "GET    /formation/lessons/:id       → getLessonById()       [JwtGuard]",
+          "POST   /formation/progress          → markLessonComplete()  [JwtGuard]",
+          "GET    /formation/my-progress       → getUserProgress()     [JwtGuard]"
+        ],
+        "dto_classes": [
+          "CreateProgressDto: { lessonId, courseId }"
+        ],
+        "course_levels": ["DEBUTANT", "INTERMEDIAIRE", "AVANCE", "EXPERT"],
+        "lesson_types": ["VIDEO", "ARTICLE", "QUIZ"],
+        "subtasks": [
+          "☑ FormationService.getCourses() avec userProgress",
+          "☑ FormationService.getCourseById() + lessons",
+          "☑ FormationService.getLessonById()",
+          "☑ FormationService.markLessonComplete() → UserProgress upsert",
+          "☑ FormationService.getUserProgress() → globalProgress %",
+          "☐ Seeder courses + lessons initiales",
+          "☐ Tester score QUIZ (score nullable)",
+          "☐ Valider unique constraint UserProgress(userId,lessonId)"
+        ]
+      },
+      "impl-09-observabilite": {
+        "title": "Métriques Prometheus + Logging 3-canaux",
+        "files": [
+          "backend-code/src/metrics/metrics.controller.ts",
+          "backend-code/src/logging/logging.service.ts"
+        ],
+        "routes_count": 1,
+        "controller_routes": [
+          "GET    /metrics  → getMetrics()  [IP whitelist: 127.0.0.1, ::1]"
+        ],
+        "logging_channels": [
+          "1. AuthLog table (Prisma persist)",
+          "2. console (NestJS Logger)",
+          "3. UDP Syslog RFC 5424"
+        ],
+        "env_required": [
+          "METRICS_ALLOWED_IPS=127.0.0.1,::1,::ffff:127.0.0.1"
+        ],
+        "subtasks": [
+          "☑ MetricsController GET /metrics (Prometheus format)",
+          "☑ LoggingService.authFailure() → 3-channel persist",
+          "☐ Configurer Prometheus scrape config",
+          "☐ Créer dashboard Grafana (auth failures, signal rate)"
+        ]
+      }
+    },
+
+    "frontend": {
+      "fe-01-setup": {
+        "title": "Next.js 13 setup + Zustand + TailwindCSS",
+        "files": [
+          "frontend-web/pages/_app.tsx",
+          "frontend-web/pages/_document.tsx",
+          "frontend-web/styles/globals.css",
+          "frontend-web/lib/seo.ts",
+          "frontend-web/package.json"
+        ],
+        "key_deps": {
+          "react":             "18.2.0",
+          "next":              "13.4.0",
+          "zustand":           "4.5.7",
+          "framer-motion":     "12.34.1",
+          "lightweight-charts":"4.2.3",
+          "tailwindcss":       "3.3.0",
+          "axios":             "1.4.0",
+          "@simplewebauthn/browser": "10.0.0"
+        },
+        "subtasks": [
+          "☑ ThemeProvider dark par défaut (next-themes)",
+          "☑ PageTransition framer-motion (dynamic, no SSR)",
+          "☑ Head SEO tags natifs (fix next-seo v7 DefaultSeo supprimé)",
+          "☑ Public routes: /login, /register, /, /pricing, /formation",
+          "☑ initAuth() sur routes privées",
+          "☐ Configurer env NEXT_PUBLIC_API_URL"
+        ]
+      },
+      "fe-02-auth": {
+        "title": "Pages authentification (12 pages)",
+        "files": [
+          "frontend-web/pages/login.tsx",
+          "frontend-web/pages/register.tsx",
+          "frontend-web/pages/auth/magic.tsx",
+          "frontend-web/pages/auth/2fa.tsx",
+          "frontend-web/pages/auth/create-password.tsx",
+          "frontend-web/pages/auth/github-callback.tsx",
+          "frontend-web/pages/auth/totp-setup.tsx",
+          "frontend-web/pages/auth/totp-verify.tsx",
+          "frontend-web/pages/auth/webauthn-setup.tsx",
+          "frontend-web/pages/auth/setup-pin.tsx",
+          "frontend-web/pages/auth/pin.tsx",
+          "frontend-web/pages/auth/locked.tsx"
+        ],
+        "pages": [
+          "/login              → Login email/password",
+          "/register           → Inscription",
+          "/auth/magic         → Magic link login",
+          "/auth/2fa           → Vérification TOTP/OTP",
+          "/auth/create-password → Setup password (OAuth users)",
+          "/auth/github-callback → Callback GitHub OAuth",
+          "/auth/totp-setup    → Enrollment TOTP (QR code)",
+          "/auth/totp-verify   → Verification TOTP",
+          "/auth/webauthn-setup → Enrollment FIDO2",
+          "/auth/setup-pin     → Configuration PIN",
+          "/auth/pin           → Verification PIN",
+          "/auth/locked        → Compte verrouillé"
+        ],
+        "hook": "useAuth() → { user, accessToken, isAuthenticated, isLoading, initAuth, login, logout }",
+        "subtasks": [
+          "☑ Login form + POST /auth/login",
+          "☑ Register form + POST /auth/register",
+          "☑ Magic link flow UI",
+          "☑ 2FA TOTP verification UI",
+          "☑ GitHub OAuth callback handler",
+          "☑ TOTP setup avec QR code display",
+          "☑ WebAuthn setup (@simplewebauthn/browser)",
+          "☑ PIN setup + verify",
+          "☑ Locked page (redirect si lockout)",
+          "☐ Tester flux complet register → MFA → dashboard"
+        ]
+      },
+      "fe-03-dashboard": {
+        "title": "Dashboard principal",
+        "files": [
+          "frontend-web/pages/dashboard/index.tsx",
+          "frontend-web/components/common/DashboardFuturiste.tsx",
+          "frontend-web/components/common/StatCard.tsx",
+          "frontend-web/components/common/SignalCard.tsx"
+        ],
+        "route": "/dashboard",
+        "features": [
+          "Stats trading (KPI StatCards)",
+          "Signaux récents (SignalCard list)",
+          "Portfolio snapshot",
+          "DashboardFuturiste component"
+        ],
+        "subtasks": [
+          "☑ Fetch GET /signals/recent",
+          "☑ Fetch GET /portfolio/stats",
+          "☑ StatCard KPI display",
+          "☑ SignalCard direction (BUY/SELL/HOLD) + confidence",
+          "☐ Refresh automatique toutes les 60s"
+        ]
+      },
+      "fe-04-signals": {
+        "title": "Pages signaux (liste + détail)",
+        "files": [
+          "frontend-web/pages/signals/index.tsx",
+          "frontend-web/pages/signals/[id].tsx",
+          "frontend-web/components/common/SignalCard.tsx",
+          "frontend-web/components/common/SignalIcon.tsx"
+        ],
+        "pages": [
+          "/signals      → Liste complète avec filtres",
+          "/signals/:id  → Détail signal"
+        ],
+        "subtasks": [
+          "☑ GET /signals → liste filtrée",
+          "☑ GET /signals/statistics → affichage KPI",
+          "☑ SignalIcon (BUY/SELL/HOLD)",
+          "☐ Filtre par asset / direction / status",
+          "☐ Bouton 'Générer signal' → POST /signals/generate"
+        ]
+      },
+      "fe-05-strategies": {
+        "title": "Pages stratégies (liste + import + analyse)",
+        "files": [
+          "frontend-web/pages/strategies/index.tsx",
+          "frontend-web/pages/strategies/new.tsx",
+          "frontend-web/pages/strategies/import.tsx"
+        ],
+        "pages": [
+          "/strategies        → Liste stratégies utilisateur",
+          "/strategies/new    → Création manuelle",
+          "/strategies/import → Import PDF/TXT/MD (max 10MB)"
+        ],
+        "subtasks": [
+          "☑ GET /strategies → liste",
+          "☑ POST /strategies/import → multipart form",
+          "☐ POST /strategies/:id/analyze → afficher analyse Claude",
+          "☐ Upload progress indicator",
+          "☐ Preview règles extraites"
+        ]
+      },
+      "fe-06-markets": {
+        "title": "Pages marchés (top 20 + détail + chart)",
+        "files": [
+          "frontend-web/pages/markets/index.tsx",
+          "frontend-web/pages/markets/[id].tsx",
+          "frontend-web/components/charts/TradingChart.tsx",
+          "frontend-web/components/charts/PatternChart.tsx"
+        ],
+        "pages": [
+          "/markets       → Top 20 crypto CoinGecko",
+          "/markets/:id   → Détail coin + OHLCV chart"
+        ],
+        "subtasks": [
+          "☑ GET /markets/top → top 20 grid",
+          "☑ GET /markets/detail/:coinId",
+          "☑ GET /markets/ohlcv/:coinId?days=14 → TradingChart",
+          "☑ TradingChart (lightweight-charts 4.2.3)",
+          "☐ Sélecteur timeframe (1j/7j/30j/90j)",
+          "☐ PatternChart overlay"
+        ]
+      },
+      "fe-07-simulator": {
+        "title": "Simulateur DCA",
+        "files": [
+          "frontend-web/pages/simulator/index.tsx",
+          "frontend-web/components/common/ProjectionLongTerme.tsx"
+        ],
+        "route": "/simulator",
+        "subtasks": [
+          "☑ Formulaire DCASimulatorDto (asset, montants, durée, rendement, volatilité)",
+          "☑ POST /simulator/dca → résultat Monte Carlo",
+          "☑ ProjectionLongTerme chart",
+          "☑ GET /simulator/history → historique simulations",
+          "☐ Export résultat PDF"
+        ]
+      },
+      "fe-08-formation": {
+        "title": "Formation (cours + leçons + progression)",
+        "files": [
+          "frontend-web/pages/formation/index.tsx",
+          "frontend-web/pages/formation/[courseId]/index.tsx",
+          "frontend-web/pages/formation/[courseId]/[lessonId].tsx"
+        ],
+        "pages": [
+          "/formation                         → Liste cours par niveau",
+          "/formation/:courseId               → Détail cours + leçons",
+          "/formation/:courseId/:lessonId     → Contenu leçon"
+        ],
+        "subtasks": [
+          "☑ GET /formation/courses → filtrage par niveau",
+          "☑ GET /formation/courses/:id",
+          "☑ GET /formation/lessons/:id",
+          "☑ POST /formation/progress → marquer complète",
+          "☑ GET /formation/my-progress → barre progression",
+          "☐ Player vidéo (VIDEO type)",
+          "☐ Quiz interface (QUIZ type)"
+        ]
+      },
+      "fe-09-profile": {
+        "title": "Profil + Sécurité (TOTP + WebAuthn)",
+        "files": [
+          "frontend-web/pages/profile/index.tsx",
+          "frontend-web/pages/profile/security.tsx"
+        ],
+        "pages": [
+          "/profile           → Profil utilisateur (préférences, notifications)",
+          "/profile/security  → Gestion MFA (TOTP, WebAuthn, PIN)"
+        ],
+        "subtasks": [
+          "☑ GET /auth/profile → affichage données",
+          "☑ TOTP status + enroll/disable UI",
+          "☑ WebAuthn credentials list + add/remove",
+          "☐ Modifier email / username",
+          "☐ Changer mot de passe"
+        ]
+      },
+      "fe-10-landing": {
+        "title": "Landing page + Pricing",
+        "files": [
+          "frontend-web/pages/index.tsx",
+          "frontend-web/pages/pricing/index.tsx",
+          "frontend-web/components/common/FeatureCard.tsx",
+          "frontend-web/components/common/AvatarIA.tsx",
+          "frontend-web/components/common/LogosPartenaires.tsx"
+        ],
+        "subtasks": [
+          "☑ Landing page (FeatureCard, AvatarIA, IllustrationIA)",
+          "☑ Pricing page (plans tarifaires)",
+          "☑ LogosPartenaires",
+          "☐ SEO structuré (ORGANIZATION_JSONLD, FAQ_JSONLD)",
+          "☐ RateLimitCard affichage quotas"
+        ]
+      }
+    },
+
+    "mobile": {
+      "mob-01-screens": {
+        "title": "5 écrans React Native (Expo)",
+        "files": [
+          "mobile/screens/auth/LoginScreen.tsx",
+          "mobile/screens/dashboard/DashboardScreen.tsx",
+          "mobile/screens/signals/SignalsScreen.tsx",
+          "mobile/screens/simulator/SimulatorScreen.tsx",
+          "mobile/screens/profile/ProfileScreen.tsx",
+          "mobile/navigation/RootNavigator.tsx"
+        ],
+        "screens": [
+          "LoginScreen    → /login",
+          "DashboardScreen→ /dashboard",
+          "SignalsScreen  → /signals",
+          "SimulatorScreen→ /simulator",
+          "ProfileScreen  → /profile"
+        ],
+        "navigation": "RootNavigator.tsx (React Navigation)",
+        "subtasks": [
+          "☐ LoginScreen → POST /auth/login",
+          "☐ DashboardScreen → GET /signals/recent + /portfolio/stats",
+          "☐ SignalsScreen → GET /signals (liste filtrée)",
+          "☐ SimulatorScreen → POST /simulator/dca",
+          "☐ ProfileScreen → GET /auth/profile",
+          "☐ Navigation guards (authToken requis)",
+          "☐ Build Expo (iOS + Android)"
+        ]
+      }
+    },
+
+    "ia": {
+      "ia-01-pattern-detection": {
+        "title": "Module Python — Détection patterns & signaux",
+        "files": [
+          "ai-module/pattern_detector.py",
+          "ai-module/signal_generator.py",
+          "ai-module/candlestick_patterns.py",
+          "ai-module/chart_patterns.py",
+          "ai-module/indicators_calculator.py",
+          "ai-module/scoring_engine.py",
+          "ai-module/elliott_waves.py",
+          "ai-module/harmonic_patterns.py",
+          "ai-module/ichimoku_indicator.py",
+          "ai-module/dca_simulator.py",
+          "ai-module/performance_tracker.py",
+          "ai-module/report_generator.py",
+          "ai-module/nlp_rule_extractor.py",
+          "ai-module/test_ai_module.py"
+        ],
+        "classes": [
+          "SignalGenerator       → orchestrateur principal",
+          "TradingSignal         → dataclass signal",
+          "CandlestickPatternDetector → Hammer, Doji, Engulfing, Shooting Star, 3WhiteSoldiers",
+          "ChartPatternDetector  → Double Top/Bottom, Head & Shoulders",
+          "TechnicalIndicators   → RSI, MACD, Stochastic, Bollinger, ATR, EMA, SMA",
+          "ScoringEngine         → confidence_score 0-100",
+          "IchimokuIndicator     → Cloud, Tenkan, Kijun",
+          "ElliottWaves          → vague impulsive / corrective",
+          "HarmonicPatterns      → Gartley, Butterfly, Bat, Crab"
+        ],
+        "entry_point": "pattern_detector.py (subprocess spawn par NestJS)",
+        "io_format": {
+          "input":  "JSON stdin: { strategy: StrategyRules, ohlcv: OHLCV[] }",
+          "output": "JSON stdout: PatternDetectionResult"
+        },
+        "subtasks": [
+          "☑ CandlestickPatternDetector (5 patterns)",
+          "☑ ChartPatternDetector",
+          "☑ TechnicalIndicators (RSI, MACD, Stochastic, Bollinger, ATR, EMA, SMA)",
+          "☑ ScoringEngine → confidence",
+          "☑ IchimokuIndicator cloud",
+          "☑ ElliottWaves detection",
+          "☑ HarmonicPatterns",
+          "☑ pattern_detector.py subprocess entry point",
+          "☑ nlp_rule_extractor.py (NLP → StrategyRules)",
+          "☐ Exécuter test_ai_module.py",
+          "☐ Tester détection Hammer sur BTC/1h réel",
+          "☐ Valider scoring score > 75 = ENTRY_SIGNAL"
+        ]
+      },
+      "ia-02-diagrams": {
+        "title": "Diagrammes PNG générés (MCD/MLD/MPD)",
+        "files": [
+          "diagrams/generate_alvio_diagrams.py",
+          "diagrams/MCD_ALVIO.png",
+          "diagrams/MLD_ALVIO.png",
+          "diagrams/MPD_ALVIO.png",
+          "diagrams/Alvio_UseCaseDiagram.puml"
+        ],
+        "subtasks": [
+          "☑ MCD_ALVIO.png (469 Ko, 300 DPI) — entités sémantiques",
+          "☑ MLD_ALVIO.png (517 Ko, 300 DPI) — logique FK + types",
+          "☑ MPD_ALVIO.png (1.1 Mo, 300 DPI) — SQL exact + index",
+          "☑ Alvio_UseCaseDiagram.puml — 12 acteurs, 65 UC, PlantUML",
+          "☐ Regénérer: python diagrams/generate_alvio_diagrams.py"
+        ]
+      }
+    }
+  },
+
+  "tests": {
+    "test-01-backend": {
+      "title": "Tests unitaires + intégration NestJS",
+      "framework": "Jest (NestJS default)",
+      "files_to_test": [
+        "backend-code/src/auth/auth.service.spec.ts",
+        "backend-code/src/signals/signals.service.spec.ts",
+        "backend-code/src/strategies/strategies.service.spec.ts",
+        "backend-code/src/markets/markets.service.spec.ts",
+        "backend-code/src/simulator/simulator.service.spec.ts",
+        "backend-code/src/formation/formation.service.spec.ts"
+      ],
+      "subtasks": [
+        "☐ AuthService: register / login / lockout / refresh",
+        "☐ SignalsService: create / generate / statistics",
+        "☐ StrategiesService: import PDF → StrategyRules",
+        "☐ MarketsService: cache hit / cache miss Redis",
+        "☐ SimulatorService: Monte Carlo 100 simulations",
+        "☐ FormationService: progress tracking",
+        "☐ E2E: flux auth complet (register → login → MFA → refresh → logout)"
+      ]
+    },
+    "test-02-frontend": {
+      "title": "Tests composants Next.js",
+      "framework": "Vitest + React Testing Library",
+      "files_to_test": [
+        "frontend-web/components/common/SignalCard.test.tsx",
+        "frontend-web/components/common/StatCard.test.tsx",
+        "frontend-web/hooks/useAuth.test.ts",
+        "frontend-web/pages/login.test.tsx",
+        "frontend-web/pages/dashboard/index.test.tsx"
+      ],
+      "subtasks": [
+        "☐ SignalCard render BUY/SELL/HOLD",
+        "☐ useAuth hook: login / logout / initAuth",
+        "☐ Login form: submit → POST /auth/login mock",
+        "☐ Dashboard: signaux récents + KPI render"
+      ]
+    },
+    "test-03-python": {
+      "title": "Tests module Python AI",
+      "framework": "pytest",
+      "files_to_test": [
+        "ai-module/test_ai_module.py"
+      ],
+      "subtasks": [
+        "☐ CandlestickPatternDetector: Hammer sur données mock",
+        "☐ TechnicalIndicators: RSI = 70 → surachat",
+        "☐ ScoringEngine: score > 75 → ENTRY_SIGNAL",
+        "☐ pattern_detector.py: stdin JSON → stdout JSON",
+        "☐ HarmonicPatterns: Gartley detection"
+      ]
+    }
+  },
+
+  "deployment": {
+    "deploy-01-docker": {
+      "title": "Docker Compose production",
+      "files": [
+        "docker-compose.yml",
+        "backend-code/Dockerfile",
+        "frontend-web/Dockerfile"
+      ],
+      "services": [
+        "postgres:15-alpine  → port 5432",
+        "redis:7-alpine      → port 6379",
+        "backend             → port 3001 (NestJS)",
+        "frontend            → port 3000 (Next.js)"
+      ],
+      "subtasks": [
+        "☐ Dockerfile backend multi-stage (build + runtime)",
+        "☐ Dockerfile frontend (next build + start)",
+        "☐ docker-compose.prod.yml (volumes persistants, restart policies)",
+        "☐ Variables d'environnement secrets (.env.prod)",
+        "☐ Health checks postgres + redis",
+        "☐ Reverse proxy Nginx (port 80/443)"
+      ]
+    },
+    "deploy-02-ci": {
+      "title": "CI/CD Pipeline",
+      "files": [
+        ".github/workflows/ci.yml",
+        ".github/workflows/deploy.yml"
+      ],
+      "subtasks": [
+        "☐ GitHub Actions: lint + test sur PR",
+        "☐ Build Docker images + push registry",
+        "☐ Deploy sur serveur (SSH ou cloud)",
+        "☐ Prisma migrations automatiques au déploiement",
+        "☐ Rollback strategy"
+      ]
+    },
+    "deploy-03-monitoring": {
+      "title": "Monitoring Prometheus + Grafana",
+      "files": [
+        "backend-code/src/metrics/metrics.controller.ts"
+      ],
+      "endpoints": [
+        "GET /metrics → Prometheus scrape (IP whitelist)"
+      ],
+      "subtasks": [
+        "☐ Configurer Prometheus scrape config",
+        "☐ Dashboard Grafana: auth failures / signal rate / latency",
+        "☐ Alerting: lockout spike, CoinGecko failures",
+        "☐ Logs centralisés (UDP Syslog → Loki ou ELK)"
+      ]
+    }
+  },
+
+  "summary": {
+    "total_backend_routes": 45,
+    "total_frontend_pages": 23,
+    "total_mobile_screens": 5,
+    "total_python_files":   16,
+    "total_prisma_models":  11,
+    "total_prisma_enums":   2,
+    "modules_implemented":  18,
+    "generated_at":         "2026-06-30"
+  }
+}

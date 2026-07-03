@@ -114,13 +114,13 @@ function AnalysisModal({ result, onClose, onTest }: { result: AnalyzeResult; onC
 
   return (
     <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-      <div onClick={(e) => e.stopPropagation()} style={{ background: '#111111', borderRadius: '20px', width: '100%', maxWidth: '600px', maxHeight: '88vh', display: 'flex', flexDirection: 'column', boxShadow: '0 24px 60px rgba(0,0,0,0.6)', border: '1px solid #1F1F1F' }}>
+      <div onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="analysis-modal-title" style={{ background: '#111111', borderRadius: '20px', width: '100%', maxWidth: '600px', maxHeight: '88vh', display: 'flex', flexDirection: 'column', boxShadow: '0 24px 60px rgba(0,0,0,0.6)', border: '1px solid #1F1F1F' }}>
         {/* Header */}
         <div style={{ padding: '24px 28px 16px', borderBottom: '1px solid #1A1A1A' }}>
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px' }}>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px', flexWrap: 'wrap' }}>
-                <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#FFFFFF', margin: 0 }}>{rules.name || 'Analyse IA'}</h2>
+                <h2 id="analysis-modal-title" style={{ fontSize: '18px', fontWeight: 700, color: '#FFFFFF', margin: 0 }}>{rules.name || 'Analyse IA'}</h2>
                 <span style={{ fontSize: '12px', fontWeight: 700, padding: '2px 10px', borderRadius: '20px', background: `${scoreColor}15`, color: scoreColor, border: `1px solid ${scoreColor}40`, whiteSpace: 'nowrap' }}>
                   Score {score}/100
                 </span>
@@ -146,8 +146,8 @@ function AnalysisModal({ result, onClose, onTest }: { result: AnalyzeResult; onC
                 ))}
               </div>
             </div>
-            <button onClick={onClose} style={{ width: '32px', height: '32px', borderRadius: '8px', border: '1px solid #2A2A2A', background: '#1A1A1A', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#555555', flexShrink: 0 }}>
-              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button onClick={onClose} aria-label="Fermer" style={{ width: '32px', height: '32px', borderRadius: '8px', border: '1px solid #2A2A2A', background: '#1A1A1A', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#555555', flexShrink: 0 }}>
+              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>

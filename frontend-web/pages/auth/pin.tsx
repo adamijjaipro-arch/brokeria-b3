@@ -94,7 +94,7 @@ const PinPage: NextPage = () => {
             </div>
 
             {error && (
-              <div style={{ background: '#fef2f2', borderRadius: '10px', padding: '12px 14px', border: '1px solid #fecaca' }}>
+              <div role="alert" aria-live="polite" style={{ background: '#fef2f2', borderRadius: '10px', padding: '12px 14px', border: '1px solid #fecaca' }}>
                 <p style={{ fontSize: '13px', color: '#dc2626', margin: '0 0 4px', fontWeight: 600 }}>{error}</p>
                 {attemptsLeft > 0 && attemptsLeft < 3 && (
                   <p style={{ fontSize: '12px', color: '#ef4444', margin: 0 }}>⚠️ {attemptsLeft} tentative{attemptsLeft > 1 ? 's' : ''} avant blocage</p>
