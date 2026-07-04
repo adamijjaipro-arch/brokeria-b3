@@ -1,5 +1,5 @@
 node_modules
-dist
+.next
 .env
 .env.*
 !.env.example
@@ -7,7 +7,3 @@ dist
 .git
 .gitignore
 coverage
-__pycache__
-*.pyc
-prisma/dev.db
-README.md
