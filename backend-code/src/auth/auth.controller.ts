@@ -51,6 +51,7 @@ export class AuthController {
 
   @Get('github')
   @UseGuards(AuthGuard('github'))
+  // eslint-disable-next-line @typescript-eslint/no-empty-function -- redirect handled by the passport guard
   githubLogin() {}
 
   @Get('github/callback')

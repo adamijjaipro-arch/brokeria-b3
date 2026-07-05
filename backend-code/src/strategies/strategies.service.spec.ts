@@ -19,6 +19,7 @@ import {
   mockStrategy,
   makeMulterFile,
 } from '../test/mocks';
+import { PDFParse } from 'pdf-parse';
 
 // Mock pdf-parse — intercepte require('pdf-parse') dans extractText()
 jest.mock('pdf-parse', () => ({
@@ -258,9 +259,8 @@ describe('StrategiesService', () => {
 
     describe('fichier PDF (application/pdf)', () => {
       it('extrait le contenu d\'un PDF et importe la stratégie avec succès', async () => {
-        const { PDFParse } = require('pdf-parse');
         const extractedText = 'Contenu PDF valide extrait correctement. '.repeat(5);
-        (PDFParse as jest.Mock).mockImplementationOnce(() => ({
+        (PDFParse as unknown as jest.Mock).mockImplementationOnce(() => ({
           getText: jest.fn().mockResolvedValue(extractedText),
         }));
         mockAI.analyzeStrategyDocument.mockResolvedValue(MOCK_STRATEGY_RULES);
@@ -274,11 +274,10 @@ describe('StrategiesService', () => {
       });
 
       it('passe le buffer du fichier à PDFParse lors de l\'extraction', async () => {
-        const { PDFParse } = require('pdf-parse');
         const pdfBuffer = Buffer.from('%PDF-1.4 mock content binaire', 'utf-8');
         let capturedOpts: { data: Buffer } | undefined;
 
-        (PDFParse as jest.Mock).mockImplementationOnce((opts: { data: Buffer }) => {
+        (PDFParse as unknown as jest.Mock).mockImplementationOnce((opts: { data: Buffer }) => {
           capturedOpts = opts;
           return { getText: jest.fn().mockResolvedValue('Texte extrait valide. '.repeat(5)) };
         });
@@ -373,8 +372,7 @@ describe('StrategiesService', () => {
       });
 
       it('n\'appelle pas Claude ni Prisma si l\'extraction PDF échoue', async () => {
-        const { PDFParse } = require('pdf-parse');
-        (PDFParse as jest.Mock).mockImplementationOnce(() => ({
+        (PDFParse as unknown as jest.Mock).mockImplementationOnce(() => ({
           getText: jest.fn().mockRejectedValue(new Error('PDF corrompu ou illisible')),
         }));
 

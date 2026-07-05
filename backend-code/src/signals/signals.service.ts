@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
 import { CreateSignalDto } from './dto/create-signal.dto';
 import { GenerateSignalDto } from './dto/generate-signal.dto';
@@ -27,6 +27,8 @@ type GenerateSignalResult =
 
 @Injectable()
 export class SignalsService {
+  private readonly logger = new Logger(SignalsService.name);
+
   constructor(
     private prisma: PrismaService,
     private emailService: EmailService,
@@ -126,7 +128,9 @@ export class SignalsService {
         },
       });
 
-      this.notifyAllUsers(signal).catch(() => {});
+      this.notifyAllUsers(signal).catch((err) =>
+        this.logger.error('Failed to notify users of new signal', err),
+      );
 
       return {
         status: 'signal_created',
@@ -198,7 +202,9 @@ export class SignalsService {
     });
 
     // Notify all registered users by email (fire-and-forget)
-    this.notifyAllUsers(signal).catch(() => {});
+    this.notifyAllUsers(signal).catch((err) =>
+      this.logger.error('Failed to notify users of new signal', err),
+    );
 
     return signal;
   }

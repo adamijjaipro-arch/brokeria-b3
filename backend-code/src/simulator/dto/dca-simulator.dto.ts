@@ -20,12 +20,12 @@ export class DCASimulatorDto {
   @IsNumber()
   @Min(-0.5)
   @Max(1)
-  annualReturn: number = 0.08;
+  annualReturn = 0.08;
 
   @IsNumber()
   @Min(0)
   @Max(1)
-  volatility: number = 0.35;
+  volatility = 0.35;
 
   @IsOptional()
   @IsIn(['monte_carlo', 'fixed'])

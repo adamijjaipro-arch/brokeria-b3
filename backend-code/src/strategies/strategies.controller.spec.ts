@@ -5,7 +5,7 @@
  */
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, NotFoundException, ValidationPipe } from '@nestjs/common';
-import * as request from 'supertest';
+import request from 'supertest';
 import { StrategiesController } from './strategies.controller';
 import { StrategiesService } from './strategies.service';
 import { JwtGuard } from '../auth/jwt.guard';

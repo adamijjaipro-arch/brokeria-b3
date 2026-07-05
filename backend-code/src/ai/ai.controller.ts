@@ -44,7 +44,7 @@ export class AIController {
   @Get('signals/asset/:asset')
   async getSignalsForAsset(
     @Param('asset') asset: string,
-    @Query('limit') limit: string = '10',
+    @Query('limit') limit = '10',
   ) {
     return await this.aiService.getSignalsForAsset(asset, parseInt(limit));
   }

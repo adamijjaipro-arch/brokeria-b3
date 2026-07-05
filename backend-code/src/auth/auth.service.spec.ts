@@ -15,6 +15,7 @@ import { AuthService } from './auth.service';
 import { PrismaService } from '../database/prisma.service';
 import { RedisService } from '../redis/redis.service';
 import { EmailService } from '../email/email.service';
+import { LoggingService } from '../logging/logging.service';
 
 // ─── Mocks ───────────────────────────────────────────────────────────────────
 
@@ -52,6 +53,19 @@ const mockConfig = {
   }),
 };
 
+const mockLogging = {
+  authSuccess:    jest.fn().mockResolvedValue(undefined),
+  authFailure:    jest.fn().mockResolvedValue(undefined),
+  mfaEnrolled:    jest.fn().mockResolvedValue(undefined),
+  mfaRevoked:     jest.fn().mockResolvedValue(undefined),
+  accountLocked:  jest.fn().mockResolvedValue(undefined),
+  sessionCreated: jest.fn().mockResolvedValue(undefined),
+  sessionExpired: jest.fn().mockResolvedValue(undefined),
+  suspiciousIp:   jest.fn().mockResolvedValue(undefined),
+};
+
+const mockRes = { cookie: jest.fn() } as unknown as import('express').Response;
+
 // ─── Tests ───────────────────────────────────────────────────────────────────
 
 describe('AuthService', () => {
@@ -67,6 +81,7 @@ describe('AuthService', () => {
         { provide: EmailService,  useValue: mockEmail },
         { provide: JwtService,    useValue: mockJwt },
         { provide: ConfigService, useValue: mockConfig },
+        { provide: LoggingService, useValue: mockLogging },
       ],
     }).compile();
     service = module.get<AuthService>(AuthService);
@@ -75,25 +90,26 @@ describe('AuthService', () => {
   // ── register ───────────────────────────────────────────────────────────────
 
   describe('register', () => {
-    it('crée un utilisateur et envoie un OTP', async () => {
+    it('crée un utilisateur et retourne un accessToken', async () => {
       const newUser = { id: 'u1', email: 'bob@example.com', username: 'bob' };
       mockPrisma.user.create.mockResolvedValue(newUser);
 
       const result = await service.register(
         { email: 'bob@example.com', username: 'bob', password: 'P@ssw0rd!23' },
+        mockRes,
         '127.0.0.1',
       );
 
-      expect(result).toHaveProperty('preAuthToken');
-      expect(typeof result.preAuthToken).toBe('string');
-      expect(mockEmail.sendOTP).toHaveBeenCalledWith('bob@example.com', expect.any(String));
+      expect(result).toHaveProperty('accessToken');
+      expect(typeof result.accessToken).toBe('string');
+      expect(result.user).toMatchObject({ id: 'u1', email: 'bob@example.com' });
     });
 
     it('lève ConflictException si email/username existe déjà', async () => {
       mockPrisma.user.create.mockRejectedValue({ code: 'P2002' });
 
       await expect(
-        service.register({ email: 'dup@example.com', username: 'dup', password: 'P@ssw0rd!' }, '127.0.0.1'),
+        service.register({ email: 'dup@example.com', username: 'dup', password: 'P@ssw0rd!' }, mockRes, '127.0.0.1'),
       ).rejects.toThrow(ConflictException);
     });
   });
@@ -101,17 +117,17 @@ describe('AuthService', () => {
   // ── login ──────────────────────────────────────────────────────────────────
 
   describe('login', () => {
-    it('retourne un preAuthToken si credentials corrects', async () => {
+    it('retourne un accessToken si credentials corrects', async () => {
       const hash = await bcrypt.hash('P@ssw0rd!23', 12);
       mockPrisma.user.findUnique.mockResolvedValue({
         id: 'u1', email: 'alice@example.com', username: 'alice', passwordHash: hash,
       });
       mockRedis.get.mockResolvedValue(null); // pas lockée
 
-      const result = await service.login({ email: 'alice@example.com', password: 'P@ssw0rd!23' }, '127.0.0.1');
+      const result = await service.login({ email: 'alice@example.com', password: 'P@ssw0rd!23' }, mockRes, '127.0.0.1');
 
-      expect(result).toHaveProperty('preAuthToken');
-      expect(mockEmail.sendOTP).toHaveBeenCalled();
+      expect(result).toHaveProperty('accessToken');
+      expect(result.user).toMatchObject({ id: 'u1', email: 'alice@example.com' });
     });
 
     it('lève UnauthorizedException si mot de passe incorrect', async () => {
@@ -122,14 +138,14 @@ describe('AuthService', () => {
       mockRedis.get.mockResolvedValue(null); // pas lockée
 
       await expect(
-        service.login({ email: 'bob@example.com', password: 'wrong' }, '127.0.0.1'),
+        service.login({ email: 'bob@example.com', password: 'wrong' }, mockRes, '127.0.0.1'),
       ).rejects.toThrow(UnauthorizedException);
     });
 
     it('lève UnauthorizedException si email inconnu', async () => {
       mockPrisma.user.findUnique.mockResolvedValue(null);
       await expect(
-        service.login({ email: 'ghost@example.com', password: 'any' }, '127.0.0.1'),
+        service.login({ email: 'ghost@example.com', password: 'any' }, mockRes, '127.0.0.1'),
       ).rejects.toThrow(UnauthorizedException);
     });
 
@@ -142,7 +158,7 @@ describe('AuthService', () => {
       mockRedis.get.mockResolvedValue('true');
 
       await expect(
-        service.login({ email: 'locked@example.com', password: 'p' }, '127.0.0.1'),
+        service.login({ email: 'locked@example.com', password: 'p' }, mockRes, '127.0.0.1'),
       ).rejects.toMatchObject({ status: 423 });
     });
   });
