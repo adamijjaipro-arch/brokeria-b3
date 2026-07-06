@@ -16,6 +16,15 @@ const nextConfig = {
 
   // ── Image Optimization ──────────────────────────────────────────────
   images: {
+    // L'optimiseur intégré (fetch serveur) se heurte au même problème de
+    // certificat que MarketsService (voir markets.service.ts DEV_AGENT) sur
+    // cette stack Docker locale — on le désactive pour laisser le navigateur
+    // charger l'image directement. (`next build` fige NODE_ENV=production
+    // quel que soit l'environnement d'exécution, donc un flag conditionnel
+    // ici ne peut pas fonctionner : ce Dockerfile/docker-compose ne sert
+    // qu'au dev/test local, la vraie prod est déployée depuis la branche
+    // vercel-frontend avec son propre next.config.js.)
+    unoptimized: true,
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920],
     imageSizes: [16, 32, 48, 64, 96, 128, 256],
