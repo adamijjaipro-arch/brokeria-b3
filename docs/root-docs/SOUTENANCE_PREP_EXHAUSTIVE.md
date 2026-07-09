@@ -442,8 +442,8 @@ Heuristiques basées sur les prix OHLCV, sans validation par backtesting réel e
 
 **Méthodologie**
 - **Scrum / Sprint / Backlog / Burndown / MoSCoW / User Story** : vocabulaire de gestion de projet agile — à relier à votre propre suivi de sprints (non vérifiable depuis le code).
-- **MCD/MLD/MPD** : Modèle Conceptuel/Logique/Physique de Données — voir `MLD.md`/`MPD.sql`/`mcd.mermaid` à la racine du repo.
-- **UML / Cas d'utilisation / Diagramme de séquence** : voir `diagrams/`.
+- **MCD/MLD/MPD** : Modèle Conceptuel/Logique/Physique de Données — voir `docs/modelisation/MLD.md`/`MPD.sql`/`mcd.mermaid` (images rendues : `docs/img/mcd.png`, `mld.png`, `mpd.png`).
+- **UML / Cas d'utilisation / Diagramme de séquence** : voir `docs/diagrams/`.
 
 **Frontend**
 - **SSR** : rendu côté serveur (Next.js par défaut sur certaines pages).
