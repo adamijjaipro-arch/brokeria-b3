@@ -7,7 +7,7 @@
 ## 📍 FICHIERS PRINCIPAUX
 
 ### 📌 START HERE
-1. **[README.md](README.md)** - Vue d'ensemble du codebase
+1. **[README.md](../../README.md)** - Vue d'ensemble du codebase
 2. **[PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md)** - Architecture et stack technique
 3. **[CODE_SUMMARY.md](CODE_SUMMARY.md)** - Quick reference + flowcharts
 
@@ -19,7 +19,7 @@
 ## 🔧 BACKEND (Python + FastAPI)
 
 ### 📄 Documentation
-- **[BACKEND_FASTAPI.md](backend/BACKEND_FASTAPI.md)** - Code complet backend
+- **[BACKEND_FASTAPI.md](../../backend/BACKEND_FASTAPI.md)** - Code complet backend
 
 ### 📚 Fichiers Inclus
 
@@ -82,7 +82,7 @@ requirements.txt            # Python dependencies
 ## 🎨 FRONTEND WEB (React + TypeScript)
 
 ### 📄 Documentation
-- **[FRONTEND_REACT.md](frontend-web/FRONTEND_REACT.md)** - Code complet web
+- **[FRONTEND_REACT.md](../../frontend-web/FRONTEND_REACT.md)** - Code complet web
 
 ### 📚 Fichiers Inclus
 
@@ -172,7 +172,7 @@ src/index.css              # Tailwind + globals
 ## 📱 MOBILE (React Native + TypeScript)
 
 ### 📄 Documentation
-- **[MOBILE_REACT_NATIVE.md](mobile/MOBILE_REACT_NATIVE.md)** - Code complet mobile
+- **[MOBILE_REACT_NATIVE.md](../../mobile/MOBILE_REACT_NATIVE.md)** - Code complet mobile
 
 ### 📚 Fichiers Inclus
 
@@ -240,7 +240,7 @@ src/index.tsx              # Entry point
 ## 🤖 AI MODULE (Python)
 
 ### 📄 Documentation
-- **[AI_MODULE_PYTHON.md](ai-module/AI_MODULE_PYTHON.md)** - Code complet IA
+- **[AI_MODULE_PYTHON.md](../../ai-module/AI_MODULE_PYTHON.md)** - Code complet IA
 
 ### 📚 Fichiers Python
 
@@ -360,22 +360,22 @@ broker-ia-intelligent/
 
 **👨‍💻 Backend Developer**
 1. Lire: [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md)
-2. Étudier: [backend/BACKEND_FASTAPI.md](backend/BACKEND_FASTAPI.md)
+2. Étudier: [backend/BACKEND_FASTAPI.md](../../backend/BACKEND_FASTAPI.md)
 3. Déployer: [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)
 
 **🎨 Frontend Developer**
 1. Lire: [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md)
-2. Étudier: [frontend-web/FRONTEND_REACT.md](frontend-web/FRONTEND_REACT.md)
+2. Étudier: [frontend-web/FRONTEND_REACT.md](../../frontend-web/FRONTEND_REACT.md)
 3. Tester: http://localhost:3000
 
 **📱 Mobile Developer**
 1. Lire: [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md)
-2. Étudier: [mobile/MOBILE_REACT_NATIVE.md](mobile/MOBILE_REACT_NATIVE.md)
+2. Étudier: [mobile/MOBILE_REACT_NATIVE.md](../../mobile/MOBILE_REACT_NATIVE.md)
 3. Builds: iOS/Android
 
 **🤖 AI/ML Engineer**
 1. Lire: [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md)
-2. Étudier: [ai-module/AI_MODULE_PYTHON.md](ai-module/AI_MODULE_PYTHON.md)
+2. Étudier: [ai-module/AI_MODULE_PYTHON.md](../../ai-module/AI_MODULE_PYTHON.md)
 3. Intégrer: Appel depuis backend
 
 **🏗️ Architect/DevOps**
@@ -448,7 +448,7 @@ Frontend (React)           Mobile (React Native)
 
 | Question | Fichier |
 |----------|---------|
-| Quoi est inclus? | [README.md](README.md) |
+| Quoi est inclus? | [README.md](../../README.md) |
 | Comment ça marche? | [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) |
 | Quel est le code? | Ce fichier (INDEX.md) |
 | Comment démarrer? | [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) |
@@ -458,7 +458,7 @@ Frontend (React)           Mobile (React Native)
 
 ## 🚀 NEXT STEPS
 
-1. **Lisez** [README.md](README.md)
+1. **Lisez** [README.md](../../README.md)
 2. **Comprenez** [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md)
 3. **Consultez** la doc de votre module
 4. **Déployez** avec [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)
