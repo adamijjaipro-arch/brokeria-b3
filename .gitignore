@@ -12,6 +12,7 @@ node_modules/
 dist/
 build/
 .next/
+coverage/
 
 # Logs
 *.log

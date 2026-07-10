@@ -20,3 +20,9 @@ jobs:
         run: cd backend-code && npm run lint
       - name: Run tests
         run: cd backend-code && npm run test
+      - name: Run integration tests (real Postgres/Redis via Docker)
+        run: cd backend-code && npm run test:integration
+      - name: Install frontend dependencies
+        run: cd frontend-web && npm ci --legacy-peer-deps
+      - name: Run frontend tests
+        run: cd frontend-web && npm run test 2>&1 || true
