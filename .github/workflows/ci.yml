@@ -26,3 +26,25 @@ jobs:
         run: cd frontend-web && npm ci --legacy-peer-deps
       - name: Run frontend tests
         run: cd frontend-web && npm run test 2>&1 || true
+
+  # ==================== CD: DEPLOYMENT ====================
+  # Backend only — le frontend est déployé séparément par l'intégration Git
+  # native de Vercel sur la branche `vercel-frontend` (voir next.config.js,
+  # frontend-web/ y est restructuré à la racine avec sa propre config). Un
+  # deuxième déploiement Vercel via CLI depuis master ici pousserait la
+  # mauvaise config en prod et entrerait en conflit avec cette intégration.
+  deploy-backend:
+    name: Deploy Backend to Railway
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: success() && github.ref == 'refs/heads/master'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+      - name: Deploy to Railway
+        run: railway up --service backend-code
+        working-directory: backend-code
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        timeout-minutes: 10
