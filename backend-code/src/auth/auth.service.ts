@@ -184,7 +184,7 @@ export class AuthService {
     return { accessToken, user };
   }
 
-  async login(dto: LoginDto, res: Response, ip?: string): Promise<{ accessToken: string; user: AuthUser }> {
+  async login(dto: LoginDto, res: Response, ip?: string): Promise<{ requiresMFA: true; preAuthToken: string; message: string }> {
     const dbUser = await this.prisma.user.findUnique({ where: { email: dto.email } });
     if (!dbUser?.passwordHash) {
       await this.logging.authFailure(null, 'password', ip, undefined, `Email inconnu: ${dto.email}`);
@@ -201,11 +201,14 @@ export class AuthService {
 
     await this.clearFailures(dbUser.id, 'password');
     await this.logging.authSuccess(dbUser.id, 'password', ip);
-    
-    // 2FA DÉSACTIVÉ : retourner directement les tokens
-    const user: AuthUser = { id: dbUser.id, email: dbUser.email, username: dbUser.username };
-    const { accessToken } = await this.issueTokens(dbUser.id, dbUser.email, res, ip);
-    return { accessToken, user };
+
+    // 2FA réactivé : mot de passe validé → OTP email → (PIN) → tokens
+    const preAuthToken = await this.generateAndSendOTP(dbUser.id, dbUser.email);
+    return {
+      requiresMFA: true,
+      preAuthToken,
+      message: 'Code OTP envoyé à votre email. Veuillez vérifier votre boîte de réception.',
+    };
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -215,13 +218,13 @@ export class AuthService {
   async requestMagicLink(userEmail: string, ip?: string): Promise<void> {
     const token      = crypto.randomBytes(32).toString('hex');
     await this.redis.set(magicKey(token), userEmail, MAGIC_TTL);
-    const frontendUrl = this.config.get<string>('FRONTEND_URL') ?? 'http://localhost:3006';
+    const frontendUrl = this.config.get<string>('FRONTEND_URL') ?? 'http://localhost:3000';
     const link        = `${frontendUrl}/auth/magic?token=${token}`;
     await this.email.sendMagicLink(userEmail, link);
     this.logger.log(`Magic link envoyé à ${userEmail}`);
   }
 
-  async verifyMagicLink(token: string, ip?: string): Promise<{ accessToken: string; user: AuthUser }> {
+  async verifyMagicLink(token: string, ip?: string): Promise<{ preAuthToken: string; requiresPassword?: boolean }> {
     const userEmail = await this.redis.get(magicKey(token));
     if (!userEmail) throw new UnauthorizedException('Lien expiré ou invalide');
     await this.redis.del(magicKey(token));
@@ -236,18 +239,27 @@ export class AuthService {
 
     await this.logging.authSuccess(dbUser.id, 'magic_link', ip);
 
-    // CONNEXION DIRECTE SANS OTP : retourner les tokens immédiatement
-    const user: AuthUser = { id: dbUser.id, email: dbUser.email, username: dbUser.username };
-    const res = {} as Response; // Dummy response for issueTokens
-    const { accessToken } = await this.issueTokens(dbUser.id, dbUser.email, res, ip);
-    return { accessToken, user };
+    // Pas encore de mot de passe : direction création de mot de passe avant l'OTP
+    if (!dbUser.passwordHash) {
+      const preAuthToken = crypto.randomUUID();
+      await this.redis.set(
+        preAuthKey(preAuthToken),
+        JSON.stringify({ userId: dbUser.id, email: dbUser.email }),
+        PREAUTH_TTL,
+      );
+      return { preAuthToken, requiresPassword: true };
+    }
+
+    // OTP réactivé : email vérifié → OTP email → (PIN) → tokens
+    const preAuthToken = await this.generateAndSendOTP(dbUser.id, dbUser.email);
+    return { preAuthToken };
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
   // 3. GITHUB OAUTH
   // ═══════════════════════════════════════════════════════════════════════════
 
-  async handleGithubCallback(profile: GithubProfile, ip?: string, res?: Response): Promise<string | { accessToken: string; user: AuthUser }> {
+  async handleGithubCallback(profile: GithubProfile, ip?: string): Promise<string> {
     let dbUser = await this.prisma.user.findFirst({ where: { githubId: profile.githubId } });
 
     if (!dbUser && profile.email) {
@@ -269,22 +281,9 @@ export class AuthService {
     if (dbUser.email.endsWith('@no-email.local')) return `no-email:${dbUser.id}`;
 
     await this.logging.authSuccess(dbUser.id, 'github', ip);
-    
-    // CONNEXION DIRECTE SANS OTP : retourner les tokens immédiatement
-    if (res) {
-      const user: AuthUser = { id: dbUser.id, email: dbUser.email, username: dbUser.username };
-      const { accessToken } = await this.issueTokens(dbUser.id, dbUser.email, res, ip);
-      return { accessToken, user };
-    }
-    
-    // Fallback pour backward compatibility
-    const preAuthToken = crypto.randomUUID();
-    await this.redis.set(
-      preAuthKey(preAuthToken),
-      JSON.stringify({ userId: dbUser.id, email: dbUser.email }),
-      PREAUTH_TTL,
-    );
-    return preAuthToken;
+
+    // OTP réactivé : compte GitHub validé → OTP email → (PIN) → tokens
+    return this.generateAndSendOTP(dbUser.id, dbUser.email);
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -374,7 +373,7 @@ export class AuthService {
   // 7. SET PASSWORD (utilisateurs magic link)
   // ═══════════════════════════════════════════════════════════════════════════
 
-  async setPassword(preAuthToken: string, password: string, ip?: string, res?: Response): Promise<{ accessToken?: string; user?: AuthUser; preAuthToken?: string }> {
+  async setPassword(preAuthToken: string, password: string, ip?: string): Promise<{ preAuthToken: string }> {
     const stored = await this.redis.get(preAuthKey(preAuthToken));
     if (!stored) throw new UnauthorizedException('Session expirée');
 
@@ -383,22 +382,8 @@ export class AuthService {
     await this.prisma.user.update({ where: { id: parsed.userId }, data: { passwordHash } });
     await this.redis.del(preAuthKey(preAuthToken));
 
-    // CONNEXION DIRECTE SANS OTP : retourner les tokens immédiatement
-    if (res) {
-      const user: AuthUser = { id: parsed.userId, email: parsed.email, username: '' };
-      const dbUser = await this.prisma.user.findUnique({ where: { id: parsed.userId } });
-      if (dbUser) user.username = dbUser.username;
-      const { accessToken } = await this.issueTokens(parsed.userId, parsed.email, res, ip);
-      return { accessToken, user };
-    }
-    
-    // Fallback pour backward compatibility
-    const newPreAuthToken = crypto.randomUUID();
-    await this.redis.set(
-      preAuthKey(newPreAuthToken),
-      JSON.stringify({ userId: parsed.userId, email: parsed.email }),
-      PREAUTH_TTL,
-    );
+    // Mot de passe créé : OTP réactivé → email → (PIN) → tokens
+    const newPreAuthToken = await this.generateAndSendOTP(parsed.userId, parsed.email);
     return { preAuthToken: newPreAuthToken };
   }
 

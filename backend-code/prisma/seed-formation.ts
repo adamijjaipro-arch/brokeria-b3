@@ -1,817 +1,244 @@
 /**
- * Seed — Formations Trading
+ * Seed — Formation Trading (LMS)
  *
- * Les videoUrl utilisent des IDs YouTube de vidéos éducatives publiques en français.
- * Si une URL ne fonctionne plus, remplacez l'ID après "embed/" par celui de la
- * vidéo souhaitée (ex: https://www.youtube.com/watch?v=XXXXXXXX → embed/XXXXXXXX).
+ * 4 modules progressifs (Course) × 3 leçons (Lesson) = 12 leçons.
+ * Chaque videoUrl a été vérifiée via l'API oEmbed de YouTube avant d'être
+ * intégrée (vidéo publique, existante, en français). Format embed :
+ * https://www.youtube.com/embed/<ID> (ID extrait de la vidéo watch?v=<ID>).
  */
 
 import { PrismaClient, CourseLevel, LessonType } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-const courses = [
+const modules = [
   // ─────────────────────────────────────────────────────────────────────────
-  // COURS 1 — Débutant
+  // MODULE 1 — Les Bases du Trading
   // ─────────────────────────────────────────────────────────────────────────
   {
     title: 'Les Bases du Trading',
     description:
-      'Maîtrisez les fondamentaux du trading : marchés, ordres, chandeliers et analyse de base. Le point de départ idéal pour tout trader.',
+      'Les fondamentaux indispensables avant de trader : ce qu’est un marché financier, comment lire un graphique en chandeliers, et comment repérer les niveaux clés de prix.',
     level: CourseLevel.DEBUTANT,
     category: 'Fondamentaux',
     thumbnail: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=600',
-    duration: 120,
-    totalLessons: 5,
     order: 1,
     isPublished: true,
     lessons: [
       {
-        title: "Qu'est-ce que le trading ?",
+        title: 'Qu’est-ce que le trading ?',
         description:
-          "Introduction complète au trading : définition, acteurs du marché, comment fonctionne l'achat et la vente d'actifs financiers.",
+          'Introduction au trading : définition, marchés disponibles (crypto, forex, actions) et acteurs qui les animent. La base avant toute stratégie.',
         videoUrl: 'https://www.youtube.com/embed/DP2uI_nA05Q',
-        content: `## Introduction au trading
-
-Le **trading** est l'acte d'acheter et vendre des actifs financiers dans le but de réaliser un profit.
-
-### Les marchés financiers
-- **Crypto** : Bitcoin, Ethereum, altcoins — marché 24h/24
-- **Forex** : Paires de devises EUR/USD, GBP/USD
-- **Actions** : Parts de sociétés cotées en Bourse
-- **Matières premières** : Or, pétrole, blé
-
-### Les acteurs du marché
-1. Les banques centrales
-2. Les fonds d'investissement institutionnels
-3. Les traders retail (particuliers)
-
-### Comment débuter ?
-Le trading nécessite une discipline de fer, une gestion du risque rigoureuse et une formation solide avant de risquer du capital réel.`,
-        duration: 20,
+        content:
+          'Le trading consiste à acheter et vendre des actifs financiers dans le but de réaliser un profit sur les variations de prix. Cette leçon présente les grandes familles de marchés (crypto, forex, actions, matières premières) et les acteurs qui les font vivre, des banques centrales aux traders particuliers.',
+        duration: 12,
         order: 1,
         type: LessonType.VIDEO,
       },
       {
-        title: 'Les types de marchés : Crypto, Forex, Actions',
+        title: 'Les chandeliers japonais',
         description:
-          'Comparaison détaillée des différents marchés financiers : caractéristiques, horaires, volatilité et opportunités.',
-        videoUrl: null,
-        content: `## Les marchés financiers en détail
-
-### 1. Marché des Cryptomonnaies
-- Ouvert **24h/24, 7j/7**
-- Volatilité très élevée (10-30% en une journée possible)
-- Actifs principaux : BTC, ETH, BNB, SOL
-- Avantage : liquidité élevée sur les paires majeures
-
-### 2. Marché Forex
-- Plus grand marché au monde : **6 000 milliards $** / jour
-- Paires majeures : EUR/USD, GBP/USD, USD/JPY
-- Ouvert du lundi au vendredi
-- Spreads faibles sur les paires liquides
-
-### 3. Marché des Actions
-- Cotées sur des bourses régulées (NYSE, Nasdaq, Euronext)
-- Horaires fixes selon les places boursières
-- Dividendes possibles
-- Accès via un courtier régulé
-
-### Tableau comparatif
-
-| Marché | Volatilité | Horaires | Levier max |
-|--------|-----------|----------|------------|
-| Crypto | Très haute | 24/7 | 10x-100x |
-| Forex | Modérée | Lun-Ven | 30x |
-| Actions | Modérée | Heures de marché | 5x |
-
-### Quel marché choisir ?
-Débutez sur le marché que vous comprenez le mieux. La crypto est accessible mais risquée ; le Forex est très liquide mais requiert de la technique.`,
-        duration: 25,
-        order: 2,
-        type: LessonType.ARTICLE,
-      },
-      {
-        title: 'Comprendre les chandeliers japonais',
-        description:
-          "Apprenez à lire les bougies japonaises, la base de toute l'analyse technique moderne.",
+          'Apprenez à lire une bougie japonaise (open, high, low, close) et à reconnaître les figures essentielles comme le doji ou le marteau.',
         videoUrl: 'https://www.youtube.com/embed/bs9Rb8xL8wk',
-        content: `## Les chandeliers japonais
-
-Les chandeliers (ou bougies) japonais sont la représentation graphique la plus utilisée en trading.
-
-### Anatomie d'une bougie
-\`\`\`
-   ─  ← Mèche haute (High)
-   │
-  ███ ← Corps (Open → Close)
-   │
-   ─  ← Mèche basse (Low)
-\`\`\`
-
-- **Corps vert** : Le prix de clôture est supérieur au prix d'ouverture (hausse)
-- **Corps rouge** : Le prix de clôture est inférieur au prix d'ouverture (baisse)
-
-### Les patterns essentiels
-
-**Doji** : Corps très petit → indécision du marché
-**Marteau** : Grande mèche basse → potentiel retournement haussier
-**Étoile filante** : Grande mèche haute → potentiel retournement baissier
-**Englobante haussière** : Grosse bougie verte qui englobe la précédente rouge
-
-### Comment les utiliser ?
-Les chandeliers donnent des signaux sur la psychologie du marché. Toujours confirmer avec d'autres indicateurs.`,
-        duration: 25,
-        order: 3,
+        content:
+          'Les chandeliers japonais sont la représentation graphique la plus utilisée en analyse technique. Chaque bougie encode quatre informations (ouverture, plus haut, plus bas, clôture) et certaines formes récurrentes — doji, marteau, étoile filante — donnent des indices sur la psychologie du marché à un instant donné.',
+        duration: 15,
+        order: 2,
         type: LessonType.VIDEO,
       },
       {
         title: 'Support et Résistance',
         description:
-          'Les niveaux de support et résistance sont les piliers de toute analyse technique. Apprenez à les identifier et les trader.',
+          'Les niveaux de support et résistance sont les piliers de toute analyse technique. Apprenez à les identifier et à construire une stratégie autour d’eux.',
         videoUrl: 'https://www.youtube.com/embed/CnRVH8AxQgw',
-        content: `## Support et Résistance
-
-### Définitions
-- **Support** : Niveau de prix où la demande est suffisamment forte pour stopper la baisse
-- **Résistance** : Niveau de prix où l'offre est suffisamment forte pour stopper la hausse
-
-### Comment les identifier ?
-1. Cherchez des zones où le prix a rebondi **au moins 2 fois**
-2. Plus le niveau a été testé souvent, plus il est fort
-3. Les anciens supports deviennent des résistances (et vice versa)
-
-### Les types de supports/résistances
-- **Horizontaux** : Niveaux fixes sur le graphique
-- **Dynamiques** : Moyennes mobiles, lignes de tendance
-- **Psychologiques** : Niveaux ronds (BTC à 50 000$, 100 000$)
-
-### Stratégie de base
-\`\`\`
-Achat au support → Stop loss sous le support → Target : résistance suivante
-Vente à la résistance → Stop loss au-dessus → Target : support suivant
-\`\`\``,
-        duration: 25,
-        order: 4,
+        content:
+          'Un support est un niveau de prix où la demande freine la baisse ; une résistance, un niveau où l’offre freine la hausse. Plus un niveau a été testé, plus il est significatif — et un ancien support cassé devient souvent une résistance, et inversement.',
+        duration: 14,
+        order: 3,
         type: LessonType.VIDEO,
-      },
-      {
-        title: 'Les ordres de bourse : Market, Limit, Stop',
-        description:
-          "Maîtrisez les différents types d'ordres pour entrer et sortir du marché au bon prix.",
-        videoUrl: null,
-        content: `## Les types d'ordres
-
-### 1. Ordre Market (Au marché)
-Exécuté **immédiatement** au meilleur prix disponible.
-- ✅ Exécution garantie
-- ❌ Prix non garanti (slippage possible)
-- Usage : entrées rapides en scalping
-
-### 2. Ordre Limit (À cours limité)
-Exécuté **uniquement si le prix atteint votre niveau**.
-- ✅ Prix garanti
-- ❌ Exécution non garantie
-- Usage : entrées en retracement, take profit
-
-### 3. Ordre Stop Loss
-Déclenche une vente automatique si le prix baisse en dessous d'un seuil.
-- Protection obligatoire pour tout trade
-- Formule : **Stop Loss = Prix d'entrée - (Capital × % risque)**
-
-### 4. Ordre OCO (One Cancels Other)
-Combine un Take Profit et un Stop Loss simultanément.
-- Le premier déclenché annule l'autre
-
-### Exemple pratique
-\`\`\`
-BTC à 63 000$
-Entrée : 63 000$ (ordre market)
-Stop Loss : 61 500$ (-2,4%)
-Take Profit : 67 000$ (+6,3%)
-Risk/Reward : 1:2.6 ✅
-\`\`\``,
-        duration: 25,
-        order: 5,
-        type: LessonType.ARTICLE,
       },
     ],
   },
 
   // ─────────────────────────────────────────────────────────────────────────
-  // COURS 2 — Intermédiaire
+  // MODULE 2 — Analyse Technique
   // ─────────────────────────────────────────────────────────────────────────
   {
-    title: 'Analyse Technique Avancée',
+    title: 'Analyse Technique',
     description:
-      'Maîtrisez les indicateurs techniques professionnels : RSI, MACD, moyennes mobiles et gestion du risque quantitative.',
-    level: CourseLevel.INTERMEDIAIRE,
+      'Passez au niveau supérieur avec les figures chartistes, les indicateurs techniques (RSI, MACD) et les retracements de Fibonacci pour affiner vos entrées.',
+    level: CourseLevel.DEBUTANT,
     category: 'Analyse Technique',
     thumbnail: 'https://images.unsplash.com/photo-1642790551116-18e4f56b6c6a?w=600',
-    duration: 150,
-    totalLessons: 5,
     order: 2,
     isPublished: true,
     lessons: [
       {
-        title: "RSI : comment l'utiliser correctement",
+        title: 'Les figures chartistes',
         description:
-          "Le RSI (Relative Strength Index) est l'indicateur le plus utilisé. Apprenez à éviter les faux signaux et à trader les divergences.",
-        videoUrl: 'https://www.youtube.com/embed/45J_2Oq3b6I',
-        content: `## RSI — Relative Strength Index
-
-### Définition
-Le RSI mesure la **vitesse et l'amplitude** des mouvements de prix sur une période donnée (défaut : 14 périodes).
-
-### Lecture du RSI
-- **RSI > 70** : Zone de surachat → attention à un retournement baissier
-- **RSI < 30** : Zone de survente → attention à un retournement haussier
-- **RSI = 50** : Zone neutre
-
-### Les divergences (signal fort)
-**Divergence baissière** :
-- Le prix fait un nouveau sommet
-- Le RSI fait un sommet plus bas
-→ Signal de retournement baissier imminent
-
-**Divergence haussière** :
-- Le prix fait un nouveau creux
-- Le RSI fait un creux plus haut
-→ Signal de retournement haussier imminent
-
-### Paramètres recommandés
-| Timeframe | Période RSI | Niveaux |
-|-----------|-------------|---------|
-| Scalping (5min) | 7-9 | 80/20 |
-| Day trading (1h) | 14 | 70/30 |
-| Swing trading (4h/1J) | 14-21 | 70/30 |`,
-        duration: 30,
+          'Triangles, têtes-épaules, doubles sommets : apprenez à identifier les figures chartistes les plus fiables pour anticiper un mouvement.',
+        videoUrl: 'https://www.youtube.com/embed/ZKe4KD2sEj8',
+        content:
+          'Les figures chartistes (tête-épaules, doubles sommets/creux, triangles) résultent de la répétition de comportements collectifs des traders sur le marché. Savoir les repérer permet d’anticiper une continuation ou un retournement de tendance avant qu’il ne se confirme.',
+        duration: 16,
         order: 1,
         type: LessonType.VIDEO,
       },
       {
-        title: 'MACD : signal et divergence',
+        title: 'Les indicateurs techniques (RSI, MACD)',
         description:
-          "Le MACD combine deux moyennes mobiles pour générer des signaux de trading. Apprenez à l'utiliser comme un professionnel.",
-        videoUrl: 'https://www.youtube.com/embed/6Fff15-V6n8',
-        content: `## MACD — Moving Average Convergence Divergence
-
-### Composition du MACD
-1. **Ligne MACD** = EMA 12 - EMA 26
-2. **Ligne Signal** = EMA 9 de la ligne MACD
-3. **Histogramme** = MACD - Signal
-
-### Signaux de trading
-
-**Croisement haussier** : La ligne MACD croise au-dessus de la ligne Signal → Achat
-**Croisement baissier** : La ligne MACD croise en dessous de la ligne Signal → Vente
-
-**Croisement de la ligne zéro** :
-- MACD passe en positif → tendance haussière confirmée
-- MACD passe en négatif → tendance baissière confirmée
-
-### Divergences MACD
-Comme pour le RSI, les divergences entre le prix et le MACD sont des signaux puissants de retournement.
-
-### Limitations
-- Indicateur **lagging** (retardé) → confirme la tendance, ne la prédit pas
-- Nombreux faux signaux en marché latéral
-- Toujours combiner avec d'autres outils`,
-        duration: 30,
+          'Le RSI et le MACD sont deux des indicateurs les plus utilisés en trading. Apprenez à les lire et à repérer les zones de surachat, de survente et les divergences.',
+        videoUrl: 'https://www.youtube.com/embed/45J_2Oq3b6I',
+        content:
+          'Le RSI (Relative Strength Index) mesure la vitesse des mouvements de prix pour signaler des zones de surachat (>70) ou de survente (<30). Le MACD, lui, combine deux moyennes mobiles pour détecter des changements de tendance. Utilisés ensemble, ils permettent de confirmer un signal plutôt que d’agir sur un seul indicateur isolé.',
+        duration: 18,
         order: 2,
         type: LessonType.VIDEO,
       },
       {
-        title: 'Les Moyennes Mobiles EMA/SMA',
+        title: 'Fibonacci et retracements',
         description:
-          "EMA et SMA sont la colonne vertébrale de l'analyse technique. Maîtrisez les croisements et le concept de tendance.",
-        videoUrl: 'https://www.youtube.com/embed/vVWbuexpZ1A',
-        content: `## Moyennes Mobiles
-
-### SMA vs EMA
-**SMA (Simple Moving Average)** : Moyenne arithmétique des N dernières bougies
-**EMA (Exponential Moving Average)** : Donne plus de poids aux données récentes
-
-L'EMA est plus **réactive** aux changements de prix, la SMA est plus **lisse**.
-
-### Périodes clés
-- **EMA 9** : Court terme, scalping
-- **EMA 21** : Court-moyen terme
-- **EMA 50** : Moyen terme, tendance intermédiaire
-- **EMA 200** : Long terme, tendance de fond
-
-### La règle d'or
-- Prix **au-dessus** de l'EMA 200 → Zone haussière (chercher des achats)
-- Prix **en-dessous** de l'EMA 200 → Zone baissière (chercher des ventes)
-
-### Croisements (Golden/Death Cross)
-**Golden Cross** : EMA 50 croise au-dessus de EMA 200 → Signal haussier majeur
-**Death Cross** : EMA 50 croise en-dessous de EMA 200 → Signal baissier majeur
-
-### Utilisation comme support/résistance dynamique
-Les EMA (notamment 21, 50) agissent comme des supports et résistances dynamiques en tendance.`,
-        duration: 30,
+          'Les niveaux de Fibonacci (38,2 % / 50 % / 61,8 %) aident à repérer les zones de correction probable dans une tendance. Apprenez à les tracer et à les utiliser.',
+        videoUrl: 'https://www.youtube.com/embed/xF60RynBFIg',
+        content:
+          'Les retracements de Fibonacci partent du principe qu’après un mouvement fort, le prix corrige souvent vers des niveaux mathématiques précis (38,2 %, 50 %, 61,8 %) avant de reprendre sa direction initiale. Ces niveaux servent de zones d’intérêt pour chercher une entrée en tendance.',
+        duration: 14,
         order: 3,
-        type: LessonType.VIDEO,
-      },
-      {
-        title: 'Les patterns de chandeliers avancés',
-        description:
-          'Englobantes, étoiles du matin/soir, marteaux, doji — les patterns qui font la différence dans vos entrées en trade.',
-        videoUrl: null,
-        content: `## Patterns de Chandeliers Avancés
-
-### Patterns de retournement haussier
-
-**Marteau (Hammer)**
-- Corps petit en haut de la bougie
-- Grande mèche basse (2x le corps)
-- Apparaît au bas d'une tendance baissière
-- Signal : les vendeurs ont poussé bas mais les acheteurs ont repris le contrôle
-
-**Englobante haussière (Bullish Engulfing)**
-- Bougie rouge suivie d'une grosse bougie verte
-- La verte englobe entièrement la rouge
-- Signal fort de retournement
-
-**Étoile du matin (Morning Star)**
-- Pattern en 3 bougies : rouge, petit corps (doji), grosse verte
-- Retournement haussier puissant
-
-### Patterns de retournement baissier
-
-**Étoile filante (Shooting Star)**
-- Corps petit en bas, grande mèche haute
-- Inverse du marteau → retournement baissier
-
-**Englobante baissière (Bearish Engulfing)**
-- Bougie verte suivie d'une grosse rouge qui l'englobe
-
-**Doji Croix (Gravestone Doji)**
-- Corps quasi nul en bas, grande mèche haute
-- Signal de retournement très baissier
-
-### Comment les utiliser
-1. Attendez qu'ils se forment à des zones clés (support/résistance)
-2. Confirmez avec le volume ou un indicateur
-3. Entrez sur la bougie suivante, pas pendant la formation`,
-        duration: 30,
-        order: 4,
-        type: LessonType.ARTICLE,
-      },
-      {
-        title: 'Gestion du risque et position sizing',
-        description:
-          'La règle numéro 1 du trading : ne jamais perdre plus de 1-2% de son capital sur un trade. Apprenez le position sizing professionnel.',
-        videoUrl: 'https://www.youtube.com/embed/6e1IT9u1g28',
-        content: `## Gestion du Risque
-
-### La règle des 1-2%
-Ne risquez **jamais plus de 1-2%** de votre capital total sur un seul trade.
-
-Avec 10 000$ de capital :
-- Risque max par trade : **100-200$**
-- Cela vous permet de survivre à 50-100 trades perdants consécutifs
-
-### Calcul du Position Sizing
-
-\`\`\`
-Taille de position = (Capital × % risque) ÷ (Prix entrée - Stop Loss)
-
-Exemple :
-Capital = 10 000$
-Risque = 1% = 100$
-BTC entrée = 63 000$, Stop = 61 500$
-Distance stop = 63 000 - 61 500 = 1 500$
-
-Taille = 100$ ÷ 1 500$ = 0.067 BTC
-\`\`\`
-
-### Risk/Reward Ratio (RR)
-Ne prenez que des trades avec **RR ≥ 1:2** (minimum).
-- Risque 100$ → Gain minimum 200$
-- Avec 50% de win rate et RR 1:2 → Rentable !
-
-### Les erreurs fatales
-❌ Overtrading (trop de trades)
-❌ Revenge trading (doubler après une perte)
-❌ Moyenner à la baisse sans plan
-❌ Ne pas respecter son stop loss`,
-        duration: 30,
-        order: 5,
         type: LessonType.VIDEO,
       },
     ],
   },
 
   // ─────────────────────────────────────────────────────────────────────────
-  // COURS 3 — Avancé
+  // MODULE 3 — Smart Money Concepts
   // ─────────────────────────────────────────────────────────────────────────
   {
-    title: 'Smart Money Concept (SMC)',
+    title: 'Smart Money Concepts',
     description:
-      'Tradez comme les institutionnels. SMC analyse les traces laissées par les "smart money" pour anticiper les grands mouvements.',
-    level: CourseLevel.AVANCE,
+      'Tradez comme les institutionnels : Order Blocks, liquidité, structure de marché et Fair Value Gaps — les outils du Smart Money Concept (SMC).',
+    level: CourseLevel.INTERMEDIAIRE,
     category: 'SMC',
     thumbnail: 'https://images.unsplash.com/photo-1569025690938-a00729c9e1f9?w=600',
-    duration: 210,
-    totalLessons: 6,
     order: 3,
     isPublished: true,
     lessons: [
       {
-        title: 'Introduction au Smart Money Concept',
+        title: 'Order Blocks et Liquidity',
         description:
-          'Comprendre la philosophie SMC : qui sont les smart money, comment manipulent-ils le marché, et comment en tirer profit.',
-        videoUrl: 'https://www.youtube.com/embed/-zmePMWwaS0',
-        content: `## Smart Money Concept — Introduction
-
-### Qui sont les "Smart Money" ?
-Les smart money sont les grands acteurs du marché :
-- Banques centrales
-- Fonds spéculatifs (hedge funds)
-- Market makers
-- Banques d'investissement
-
-### La manipulation institutionnelle
-Les institutionnels ont besoin de **liquidité** pour remplir leurs énormes positions. Ils créent des mouvements de prix intentionnels pour :
-1. Chasser les stop loss des retail traders
-2. Accumuler des positions à bas prix
-3. Distribuer leurs positions en haut
-
-### Les 3 phases du marché selon SMC
-1. **Accumulation** : Les institutionnels achètent discrètement
-2. **Manipulation** : Faux mouvement pour chasser les stops
-3. **Distribution** : Les institutionnels revendent en force
-
-### Pourquoi le SMC fonctionne
-En comprenant ce cycle, vous pouvez vous positionner **avec** les institutionnels plutôt que d'être leur proie.`,
-        duration: 35,
+          'Les Order Blocks marquent les zones où les institutionnels ont placé leurs ordres. Combinés à la liquidité, ils forment la base de toute analyse SMC.',
+        videoUrl: 'https://www.youtube.com/embed/pqQsI6brtKY',
+        content:
+          'Un Order Block est la dernière bougie opposée avant un mouvement directionnel fort — la trace laissée par une prise de position institutionnelle. La liquidité, elle, s’accumule au-dessus des sommets et sous les creux, là où se concentrent les ordres stop des traders retail : deux notions indissociables en SMC.',
+        duration: 20,
         order: 1,
         type: LessonType.VIDEO,
       },
       {
-        title: 'Order Blocks institutionnels',
+        title: 'Break of Structure (BOS)',
         description:
-          'Les Order Blocks sont les zones où les institutionnels ont placé de grosses commandes. Ces zones agissent comme des aimants à prix.',
-        videoUrl: 'https://www.youtube.com/embed/ftAuQSy8S_g',
-        content: `## Order Blocks
-
-### Définition
-Un **Order Block (OB)** est la dernière bougie opposée avant un grand mouvement directionnel. C'est la zone où les institutionnels ont placé leurs ordres.
-
-### Identifier un Order Block haussier
-1. Prix en tendance haussière
-2. Dernier corps rouge (baisse) avant une forte montée
-3. Cette bougie rouge = Order Block haussier
-
-### Identifier un Order Block baissier
-1. Prix en tendance baissière
-2. Dernier corps vert (hausse) avant une forte chute
-3. Cette bougie verte = Order Block baissier
-
-### Comment trader les Order Blocks
-\`\`\`
-Entrée : Retour du prix sur l'Order Block
-Stop Loss : En dessous/au-dessus de l'OB
-Target : Prochain déséquilibre de prix (FVG)
-\`\`\`
-
-### Validation d'un Order Block
-Un OB est valide si :
-✅ Il a causé un Break of Structure (BOS)
-✅ Il n'a pas encore été retesté
-✅ Il se situe dans la direction de la tendance HTF`,
-        duration: 35,
+          'Le Break of Structure confirme la continuation d’une tendance, tandis que le Change of Character (CHoCH) en signale le retournement. Apprenez à distinguer les deux.',
+        videoUrl: 'https://www.youtube.com/embed/slzCMYy5iYI',
+        content:
+          'Un Break of Structure (BOS) se produit quand le prix casse un sommet (tendance haussière) ou un creux (tendance baissière) précédent, confirmant que la tendance en cours se poursuit. À l’inverse, un Change of Character (CHoCH) casse la structure dans le sens opposé et alerte sur un possible retournement.',
+        duration: 18,
         order: 2,
         type: LessonType.VIDEO,
       },
       {
-        title: 'Break of Structure (BOS) et Market Structure',
+        title: 'Fair Value Gaps',
         description:
-          'La structure de marché est la base du SMC. Apprenez à lire les BOS pour définir la direction institutionnelle.',
-        videoUrl: 'https://www.youtube.com/embed/slzCMYy5iYI',
-        content: `## Break of Structure (BOS)
-
-### La structure de marché
-Le marché se déplace en zigzag :
-- **HH** (Higher High) + **HL** (Higher Low) = Structure haussière
-- **LH** (Lower High) + **LL** (Lower Low) = Structure baissière
-
-### Break of Structure (BOS)
-Un BOS confirme la **continuation** de la tendance :
-- En hausse : Prix casse un HH → BOS haussier, structure intacte
-- En baisse : Prix casse un LL → BOS baissier, structure intacte
-
-### Change of Character (CHoCH)
-Un CHoCH signale un **retournement** de tendance :
-- En hausse : Prix casse un HL → CHoCH baissier
-- En baisse : Prix casse un LH → CHoCH haussier
-
-### Stratégie BOS
-\`\`\`
-1. Identifier la structure sur HTF (4H, 1D)
-2. Zoomer sur LTF (15min, 1H) pour l'entrée
-3. Attendre un CHoCH sur LTF dans la direction HTF
-4. Entrer sur le retest de l'Order Block du CHoCH
-\`\`\``,
-        duration: 35,
+          'Un Fair Value Gap est un déséquilibre de prix que le marché cherche souvent à combler. Apprenez à le repérer et à l’utiliser comme zone d’entrée.',
+        videoUrl: 'https://www.youtube.com/embed/skk0sm6LN6M',
+        content:
+          'Un Fair Value Gap (FVG) apparaît lors d’un mouvement de prix rapide, laissant un vide entre trois bougies successives — une zone où aucune transaction n’a eu lieu. Le prix revient fréquemment combler une partie de ce vide avant de poursuivre sa direction initiale, ce qui en fait une zone d’entrée prisée en SMC.',
+        duration: 17,
         order: 3,
         type: LessonType.VIDEO,
-      },
-      {
-        title: 'Fair Value Gap (FVG)',
-        description:
-          "Les FVG sont des déséquilibres de prix que le marché cherche toujours à combler. Une des zones d'entrée les plus précises du SMC.",
-        videoUrl: 'https://www.youtube.com/embed/skk0sm6LN6M',
-        content: `## Fair Value Gap (FVG)
-
-### Définition
-Un **Fair Value Gap** est un écart de prix créé quand :
-- Bougie 1 : Corps normal
-- Bougie 2 : Gap (la mèche haute de B1 ne touche pas la mèche basse de B3)
-- Bougie 3 : Corps normal
-
-Cet écart représente une zone où **aucune transaction n'a eu lieu** → déséquilibre.
-
-### Types de FVG
-**FVG haussier** : Créé lors d'un move rapide à la hausse → le prix reviendra combler
-**FVG baissier** : Créé lors d'un move rapide à la baisse → le prix reviendra combler
-
-### Règle des 50%
-Le prix revient souvent au **50% du FVG** avant de repartir dans la direction initiale. C'est votre zone d'entrée optimale.
-
-### FVG + Order Block = Setup parfait
-Quand un FVG se superpose à un Order Block, la probabilité de rebond est maximale.
-
-### Invalidation
-Un FVG est invalidé quand le prix le traverse entièrement. Passez au prochain niveau.`,
-        duration: 35,
-        order: 4,
-        type: LessonType.VIDEO,
-      },
-      {
-        title: 'CHoCH et inversion de tendance',
-        description:
-          'Change of Character : comment détecter les retournements de tendance avant tout le monde avec le SMC.',
-        videoUrl: 'https://www.youtube.com/embed/slzCMYy5iYI',
-        content: `## Change of Character (CHoCH)
-
-### Différence BOS vs CHoCH
-
-| Signal | Type | Signification |
-|--------|------|---------------|
-| BOS | Continuation | La tendance continue |
-| CHoCH | Retournement | La tendance change |
-
-### Identifier un CHoCH haussier
-1. Marché en tendance baissière (LH + LL)
-2. Prix casse un **Lower High** → CHoCH
-3. Structure devient potentiellement haussière
-
-### Identifier un CHoCH baissier
-1. Marché en tendance haussière (HH + HL)
-2. Prix casse un **Higher Low** → CHoCH
-3. Structure devient potentiellement baissière
-
-### Stratégie de retournement SMC
-\`\`\`
-1. Identifier CHoCH sur HTF
-2. Zoomer sur LTF, chercher un Order Block de retournement
-3. Entrer sur le reteset de cet OB
-4. Stop sous/sur l'OB
-5. Target : premier FVG dans la nouvelle direction
-\`\`\``,
-        duration: 35,
-        order: 5,
-        type: LessonType.VIDEO,
-      },
-      {
-        title: 'Les sessions de trading : Asia, London, New York',
-        description:
-          'Comprendre les sessions mondiales pour trader aux moments où la liquidité et la volatilité sont optimales.',
-        videoUrl: null,
-        content: `## Sessions de Trading Mondiales
-
-### Les 3 grandes sessions
-
-| Session | Heure Paris (CET) | Caractéristiques |
-|---------|-------------------|-----------------|
-| **Asie** | 01h00 - 10h00 | Faible volatilité, range tight |
-| **Londres** | 09h00 - 18h00 | Fort volume, grande volatilité |
-| **New York** | 14h30 - 23h00 | Pics de volume aux ouvertures |
-
-### Le Kill Zone SMC
-
-**Asia Kill Zone** : 01h00 - 04h00 CET
-→ Le marché établit les high/low de la session asiatique (liquidity pools)
-
-**London Kill Zone** : 09h00 - 11h00 CET
-→ Les institutionnels londoniens ouvrent → chasse des stops asiatiques
-
-**New York Kill Zone** : 14h30 - 16h30 CET
-→ Le plus fort volume de la journée → mouvements directionnels majeurs
-
-### Stratégie Kill Zone
-1. Identifier le high/low de la session Asia
-2. En London KZ, guetter un stop hunt de ces niveaux
-3. Entrer dans la direction opposée (SMC setup)
-4. La NY KZ confirmera et amplifiera le move
-
-### Conclusion
-Les 80% des mouvements importants se produisent dans ces kill zones. Concentrez votre analyse et vos entrées sur ces fenêtres temporelles.`,
-        duration: 35,
-        order: 6,
-        type: LessonType.ARTICLE,
       },
     ],
   },
 
   // ─────────────────────────────────────────────────────────────────────────
-  // COURS 4 — Expert
+  // MODULE 4 — Gestion du Risque
   // ─────────────────────────────────────────────────────────────────────────
   {
-    title: 'Trading Algorithmique',
+    title: 'Gestion du Risque',
     description:
-      "Automatisez vos stratégies de trading avec du code. Du backtesting à l'exécution automatique, devenez un algo trader.",
-    level: CourseLevel.EXPERT,
-    category: 'Algo Trading',
-    thumbnail: 'https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?w=600',
-    duration: 120,
-    totalLessons: 3,
+      'La partie la plus négligée par les débutants : combien risquer, comment gérer ses émotions, et comment structurer un vrai plan de trading durable.',
+    level: CourseLevel.AVANCE,
+    category: 'Risk Management',
+    thumbnail: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=600',
     order: 4,
     isPublished: true,
     lessons: [
       {
-        title: 'Introduction au trading algorithmique',
+        title: 'Money Management',
         description:
-          'Découvrez comment les banques et hedge funds utilisent des algorithmes pour trader des milliards automatiquement.',
-        videoUrl: 'https://www.youtube.com/embed/HokSf08qnNs',
-        content: `## Trading Algorithmique
-
-### Définition
-Le trading algorithmique (algo trading) consiste à utiliser des programmes informatiques pour exécuter des ordres de trading selon des règles prédéfinies, sans intervention humaine.
-
-### Types d'algorithmes
-
-**1. Algorithmes de suivi de tendance**
-- Se basent sur EMA, MACD, RSI
-- Achètent en tendance haussière, vendent en baissière
-
-**2. Algorithmes mean-reversion**
-- Partent du principe que le prix revient à sa moyenne
-- Achètent quand le prix est trop bas, vendent trop haut
-
-**3. Algorithmes d'arbitrage**
-- Exploitent les différences de prix entre exchanges
-- Nécessitent une exécution ultra-rapide (HFT)
-
-**4. Algorithmes de Market Making**
-- Placent des ordres des deux côtés du carnet d'ordres
-- Gagnent sur le spread
-
-### Avantages du trading algo
-✅ Pas d'émotions → discipline parfaite
-✅ Exécution instantanée 24/7
-✅ Backtesting quantitatif
-✅ Peut gérer plusieurs stratégies simultanément
-
-### Les langages utilisés
-- **Python** : Le plus populaire (pandas, numpy, backtrader)
-- **JavaScript/TypeScript** : Pour les exchanges crypto (ccxt)
-- **C++** : Pour le HFT (microsecondes)`,
-        duration: 40,
+          'La règle des 1-2 % : ne jamais risquer plus d’une petite fraction de son capital par trade. Apprenez à calculer la bonne taille de position.',
+        videoUrl: 'https://www.youtube.com/embed/6e1IT9u1g28',
+        content:
+          'Le money management repose sur une règle simple : ne jamais risquer plus de 1 à 2 % de son capital sur un seul trade, afin de survivre à une série de pertes consécutives. La taille de position se calcule à partir du capital, du risque accepté et de la distance jusqu’au stop loss.',
+        duration: 16,
         order: 1,
         type: LessonType.VIDEO,
       },
       {
-        title: "Backtesting d'une stratégie",
+        title: 'Psychologie du trader',
         description:
-          'Le backtesting est indispensable pour valider une stratégie avant de risquer du capital réel. Apprenez à backtester correctement.',
-        videoUrl: null,
-        content: `## Backtesting
-
-### Définition
-Le backtesting consiste à tester une stratégie de trading sur des **données historiques** pour évaluer sa performance passée.
-
-### Les métriques clés du backtesting
-
-| Métrique | Description | Objectif |
-|----------|-------------|----------|
-| **Win Rate** | % de trades gagnants | > 50% |
-| **Profit Factor** | Gains totaux / Pertes totales | > 1.5 |
-| **Max Drawdown** | Perte maximale depuis un pic | < 20% |
-| **Sharpe Ratio** | Rendement / Risque | > 1 |
-
-### Processus de backtesting
-
-\`\`\`python
-# Exemple simplifié en Python avec backtrader
-import backtrader as bt
-
-class MaStrategie(bt.Strategy):
-    def __init__(self):
-        self.ema20 = bt.indicators.EMA(period=20)
-        self.ema50 = bt.indicators.EMA(period=50)
-
-    def next(self):
-        if self.ema20 > self.ema50 and not self.position:
-            self.buy()
-        elif self.ema20 < self.ema50 and self.position:
-            self.sell()
-\`\`\`
-
-### Pièges du backtesting
-❌ **Overfitting** : Sur-optimisation sur les données historiques
-❌ **Look-ahead bias** : Utiliser des données futures pour prendre des décisions passées
-❌ **Survivorship bias** : Ne tester que sur les actifs qui existent encore
-
-### La bonne pratique
-Divisez vos données : 70% pour optimiser, 30% pour valider (out-of-sample test).`,
-        duration: 40,
+          'Peur, avidité, revenge trading : les biais psychologiques sont souvent la première cause de perte, bien avant la stratégie elle-même.',
+        videoUrl: 'https://www.youtube.com/embed/IZwqt_HxhBg',
+        content:
+          'La majorité des pertes en trading ne viennent pas d’une mauvaise stratégie, mais d’une mauvaise gestion des émotions : peur de rater une opportunité, avidité qui pousse à sur-risquer, ou revenge trading après une perte. Reconnaître ces biais est la première étape pour les maîtriser.',
+        duration: 15,
         order: 2,
-        type: LessonType.ARTICLE,
+        type: LessonType.VIDEO,
       },
       {
-        title: 'Gestion de portefeuille quantitative',
+        title: 'Construire un plan de trading',
         description:
-          "Modern Portfolio Theory, Kelly Criterion, allocation optimale. Les mathématiques au service de votre portefeuille.",
-        videoUrl: null,
-        content: `## Gestion de Portefeuille Quantitative
-
-### Modern Portfolio Theory (Markowitz)
-
-La théorie moderne du portefeuille (MPT) cherche à **maximiser le rendement** pour un niveau de risque donné, ou à **minimiser le risque** pour un rendement ciblé.
-
-**Concepts clés :**
-- **Diversification** : Combiner des actifs peu corrélés réduit le risque global
-- **Frontière efficiente** : L'ensemble des portefeuilles optimaux (meilleur ratio rendement/risque)
-- **Volatilité** : Mesurée par l'écart-type des rendements
-
-### Kelly Criterion
-La fraction de Kelly détermine la taille optimale de position :
-
-\`\`\`
-f = (p × b - q) / b
-
-Où :
-f = fraction du capital à risquer
-p = probabilité de gain (win rate)
-q = 1 - p (probabilité de perte)
-b = ratio gain/perte (risk/reward)
-
-Exemple : p=0.55, b=2 (RR 1:2), q=0.45
-f = (0.55 × 2 - 0.45) / 2 = 0.325 → Risquer 32.5% max
-En pratique : utiliser Kelly/4 = 8% (Kelly fractionnel)
-\`\`\`
-
-### Corrélation entre actifs
-Diversifiez avec des actifs décorrélés :
-- BTC + Or (corrélation faible historiquement)
-- Actions tech + Obligations (corrélation négative en crise)
-- Crypto + Forex (marchés différents)
-
-### Rebalancement du portefeuille
-Rééquilibrez périodiquement (mensuel ou trimestriel) pour maintenir votre allocation cible.`,
-        duration: 40,
+          'Un plan de trading écrit — critères d’entrée, de sortie, et règles de risque — est ce qui distingue un trader discipliné d’un joueur.',
+        videoUrl: 'https://www.youtube.com/embed/eO6cXMM2Rp8',
+        content:
+          'Un plan de trading formalise par écrit les règles d’entrée, de sortie, la taille de position et les conditions de marché dans lesquelles on accepte de trader. Il sert de garde-fou contre les décisions impulsives et permet d’évaluer objectivement ses résultats dans la durée.',
+        duration: 19,
         order: 3,
-        type: LessonType.ARTICLE,
+        type: LessonType.VIDEO,
       },
     ],
   },
 ];
 
 async function main() {
-  console.log('🌱 Démarrage du seed formations...');
+  console.log('🌱 Démarrage du seed Formation...');
 
-  // Nettoyage préalable
+  // Nettoyage préalable (ordre : dépendances d'abord)
   await prisma.userProgress.deleteMany();
   await prisma.lesson.deleteMany();
   await prisma.course.deleteMany();
 
-  for (const courseData of courses) {
-    const { lessons, ...course } = courseData;
+  for (const moduleData of modules) {
+    const { lessons, ...course } = moduleData;
+    const totalLessons = lessons.length;
+    const duration = lessons.reduce((sum, l) => sum + l.duration, 0);
 
     const createdCourse = await prisma.course.create({
       data: {
         ...course,
-        lessons: {
-          create: lessons.map((lesson) => ({
-            ...lesson,
-            videoUrl: lesson.videoUrl ?? null,
-          })),
-        },
+        totalLessons,
+        duration,
+        lessons: { create: lessons },
       },
     });
 
     console.log(
-      `  ✅ Cours créé : "${createdCourse.title}" (${createdCourse.level}) — ${lessons.length} leçons`,
+      `  ✅ Module créé : "${createdCourse.title}" (${createdCourse.level}) — ${totalLessons} leçons, ${duration} min`,
     );
   }
 
   const totalCourses = await prisma.course.count();
   const totalLessons = await prisma.lesson.count();
-  console.log(`\n✨ Seed terminé : ${totalCourses} cours, ${totalLessons} leçons créées.`);
+  console.log(`\n✨ Seed terminé : ${totalCourses} modules, ${totalLessons} leçons créées.`);
 }
 
 main()

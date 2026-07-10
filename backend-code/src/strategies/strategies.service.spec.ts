@@ -22,9 +22,11 @@ import {
 import { PDFParse } from 'pdf-parse';
 
 // Mock pdf-parse — intercepte require('pdf-parse') dans extractText()
+// getText() résout un TextResult ({ text, pages, total }), pas un string brut.
 jest.mock('pdf-parse', () => ({
   PDFParse: jest.fn().mockImplementation(() => ({
-    getText: jest.fn().mockResolvedValue('Contenu PDF par défaut — mock initial. '.repeat(5)),
+    getText: jest.fn().mockResolvedValue({ text: 'Contenu PDF par défaut — mock initial. '.repeat(5) }),
+    destroy: jest.fn().mockResolvedValue(undefined),
   })),
 }));
 
@@ -261,7 +263,8 @@ describe('StrategiesService', () => {
       it('extrait le contenu d\'un PDF et importe la stratégie avec succès', async () => {
         const extractedText = 'Contenu PDF valide extrait correctement. '.repeat(5);
         (PDFParse as unknown as jest.Mock).mockImplementationOnce(() => ({
-          getText: jest.fn().mockResolvedValue(extractedText),
+          getText: jest.fn().mockResolvedValue({ text: extractedText }),
+          destroy: jest.fn().mockResolvedValue(undefined),
         }));
         mockAI.analyzeStrategyDocument.mockResolvedValue(MOCK_STRATEGY_RULES);
         mockPrisma.strategy.create.mockResolvedValue(mockStrategy());
@@ -273,13 +276,29 @@ describe('StrategiesService', () => {
         expect(mockAI.analyzeStrategyDocument).toHaveBeenCalledWith(extractedText);
       });
 
+      it('lève BadRequestException (et non TypeError) si getText() résout sans champ text — régression bug prod "rawText.trim is not a function"', async () => {
+        (PDFParse as unknown as jest.Mock).mockImplementationOnce(() => ({
+          getText: jest.fn().mockResolvedValue({}),
+          destroy: jest.fn().mockResolvedValue(undefined),
+        }));
+
+        const pdfFile = makeMulterFile(Buffer.alloc(1024), 'application/pdf', 'strategy.pdf');
+
+        await expect(
+          service.importFromDocument(pdfFile, BASE_DTO, 'user-test-1'),
+        ).rejects.toThrow(BadRequestException);
+      });
+
       it('passe le buffer du fichier à PDFParse lors de l\'extraction', async () => {
         const pdfBuffer = Buffer.from('%PDF-1.4 mock content binaire', 'utf-8');
         let capturedOpts: { data: Buffer } | undefined;
 
         (PDFParse as unknown as jest.Mock).mockImplementationOnce((opts: { data: Buffer }) => {
           capturedOpts = opts;
-          return { getText: jest.fn().mockResolvedValue('Texte extrait valide. '.repeat(5)) };
+          return {
+            getText:  jest.fn().mockResolvedValue({ text: 'Texte extrait valide. '.repeat(5) }),
+            destroy:  jest.fn().mockResolvedValue(undefined),
+          };
         });
         mockAI.analyzeStrategyDocument.mockResolvedValue(MOCK_STRATEGY_RULES);
         mockPrisma.strategy.create.mockResolvedValue(mockStrategy());
@@ -373,7 +392,8 @@ describe('StrategiesService', () => {
 
       it('n\'appelle pas Claude ni Prisma si l\'extraction PDF échoue', async () => {
         (PDFParse as unknown as jest.Mock).mockImplementationOnce(() => ({
-          getText: jest.fn().mockRejectedValue(new Error('PDF corrompu ou illisible')),
+          getText:  jest.fn().mockRejectedValue(new Error('PDF corrompu ou illisible')),
+          destroy:  jest.fn().mockResolvedValue(undefined),
         }));
 
         const pdfFile = makeMulterFile(Buffer.alloc(512), 'application/pdf');

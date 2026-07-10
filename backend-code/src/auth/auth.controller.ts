@@ -57,19 +57,14 @@ export class AuthController {
   @Get('github/callback')
   @UseGuards(AuthGuard('github'))
   async githubCallback(@Req() req: Request & { user: GithubProfile }, @Res() res: Response) {
-    const frontendUrl = process.env.FRONTEND_URL ?? 'http://localhost:3006';
+    const frontendUrl = process.env.FRONTEND_URL ?? 'http://localhost:3000';
     try {
-      const result = await this.authService.handleGithubCallback(req.user, getIp(req));
-      if (typeof result === 'string') {
-        if (result.startsWith('no-email:')) {
-          res.redirect(`${frontendUrl}/login?error=no_email`);
-        } else {
-          res.redirect(`${frontendUrl}/auth/2fa?token=${result}`);
-        }
-        return;
+      const preAuthToken = await this.authService.handleGithubCallback(req.user, getIp(req));
+      if (preAuthToken.startsWith('no-email:')) {
+        res.redirect(`${frontendUrl}/login?error=no_email`);
+      } else {
+        res.redirect(`${frontendUrl}/auth/2fa?token=${preAuthToken}`);
       }
-      // 2FA désactivé — redirection directe avec le token dans l'URL
-      res.redirect(`${frontendUrl}/auth/callback?token=${result.accessToken}`);
     } catch {
       res.redirect(`${frontendUrl}/login?error=github_failed`);
     }

@@ -205,7 +205,18 @@ const Dashboard: NextPage = () => {
             </button>
           </div>
           {(recentSignals.length > 0
-            ? recentSignals.slice(0, 4).map((s) => ({ asset: s.asset, dir: s.direction, conf: s.confidence, pattern: (s.patterns ? (JSON.parse(s.patterns) as string[])[0] : null) || '—' }))
+            ? recentSignals.slice(0, 4).map((s) => {
+                let pattern = '—';
+                if (s.patterns) {
+                  try {
+                    const parsed = JSON.parse(s.patterns);
+                    pattern = (Array.isArray(parsed) ? parsed[0] : parsed) || '—';
+                  } catch {
+                    pattern = s.patterns;
+                  }
+                }
+                return { asset: s.asset, dir: s.direction, conf: s.confidence, pattern };
+              })
             : [
                 { asset: 'BTC/USDT', dir: 'BUY', conf: 92, pattern: 'Bullish Engulfing' },
                 { asset: 'SOL/USDT', dir: 'BUY', conf: 85, pattern: 'Double Bottom' },

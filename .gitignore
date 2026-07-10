@@ -40,3 +40,4 @@ __pycache__/
 
 # TypeScript build info
 *.tsbuildinfo
+mobile/.expo/

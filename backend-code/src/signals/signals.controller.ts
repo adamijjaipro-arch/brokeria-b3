@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, UseGuards, Request } from '@nestjs/common';
 import { SignalsService } from './signals.service';
 import { SignalSchedulerService } from './signal-scheduler.service';
 import { JwtGuard } from '../auth/jwt.guard';
@@ -34,6 +34,16 @@ export class SignalsController {
   @Get('statistics')
   async getSignalsStatistics(@Request() req: any) {
     return this.signalsService.getSignalsStatistics(req.user.id);
+  }
+
+  /**
+   * GET /signals/:id
+   * Kept after 'recent' / 'statistics' so those static paths aren't shadowed
+   * by this dynamic param route.
+   */
+  @Get(':id')
+  async getSignalById(@Param('id') id: string, @Request() req: any) {
+    return this.signalsService.getSignalById(req.user.id, id);
   }
 
   /**

@@ -117,7 +117,7 @@ describe('AuthService', () => {
   // ── login ──────────────────────────────────────────────────────────────────
 
   describe('login', () => {
-    it('retourne un accessToken si credentials corrects', async () => {
+    it('retourne requiresMFA + preAuthToken si credentials corrects', async () => {
       const hash = await bcrypt.hash('P@ssw0rd!23', 12);
       mockPrisma.user.findUnique.mockResolvedValue({
         id: 'u1', email: 'alice@example.com', username: 'alice', passwordHash: hash,
@@ -126,8 +126,9 @@ describe('AuthService', () => {
 
       const result = await service.login({ email: 'alice@example.com', password: 'P@ssw0rd!23' }, mockRes, '127.0.0.1');
 
-      expect(result).toHaveProperty('accessToken');
-      expect(result.user).toMatchObject({ id: 'u1', email: 'alice@example.com' });
+      expect(result.requiresMFA).toBe(true);
+      expect(result.preAuthToken).toBeDefined();
+      expect(result.message).toContain('Code OTP');
     });
 
     it('lève UnauthorizedException si mot de passe incorrect', async () => {

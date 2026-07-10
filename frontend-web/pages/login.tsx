@@ -12,7 +12,6 @@ import { useRouter } from 'next/router';
 import { authApi } from '../api';
 import PageSEO from '../components/seo/PageSEO';
 import { SITE_URL } from '../lib/seo';
-import { useAuthStore } from '../context/authStore';
 
 type Tab = 'password' | 'magic';
 
@@ -20,7 +19,6 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 const LoginPage: NextPage = () => {
   const router = useRouter();
-  const { setAuth } = useAuthStore();
 
   const [tab, setTab] = useState<Tab>('password');
 
@@ -41,8 +39,7 @@ const LoginPage: NextPage = () => {
     setLoading(true); setError('');
     try {
       const { data } = await authApi.login(email, password);
-      setAuth(data.accessToken, data.user);
-      router.push('/dashboard');
+      router.push(`/auth/2fa?token=${data.preAuthToken}`);
     } catch (err: any) {
       const msg = err?.response?.data?.message;
       setError(Array.isArray(msg) ? msg.join(', ') : msg || 'Email ou mot de passe incorrect');

@@ -20,6 +20,7 @@ export interface Signal {
   id: string;
   asset: string;
   direction: SignalDirection;
+  timeframe?: string | null;
   confidence: number;
   entry_price: number;
   stop_loss: number;

@@ -192,6 +192,7 @@ export const signalsApi = {
   getAll: () => api.get<Signal[]>('/signals'),
   getRecent: () => api.get<Signal[]>('/signals/recent'),
   getStatistics: () => api.get<SignalStats>('/signals/statistics'),
+  getById: (id: string) => api.get<Signal>(`/signals/${id}`),
   create: (signal: CreateSignalPayload) => api.post<Signal>('/signals', signal),
 };
 

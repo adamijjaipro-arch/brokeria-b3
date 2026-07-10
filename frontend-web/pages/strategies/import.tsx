@@ -8,11 +8,18 @@ import PageSEO from '../../components/seo/PageSEO';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
+interface StrategyIndicator { name: string; params: string; }
+
+interface RiskManagement {
+  stop_loss: string; take_profit: string;
+  position_size: string; risk_reward: string;
+}
+
 interface StrategyRules {
   entry_conditions: string[];
   exit_conditions:  string[];
-  indicators:       string[];
-  risk_management:  string[];
+  indicators:       StrategyIndicator[];
+  risk_management:  RiskManagement;
 }
 
 interface ImportResult {
@@ -67,6 +74,28 @@ const RulesCard: React.FC<RulesCardProps> = ({ title, items, accent, bg, border,
         {items.map((item, i) => (
           <div key={i} style={{ background: bg, borderRadius: '8px', padding: '8px 12px', border: `1px solid ${border}` }}>
             <p style={{ fontSize: '13px', color: '#CCCCCC', margin: 0, lineHeight: '1.5' }}>{item}</p>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+);
+
+// ─── IndicatorsSection ────────────────────────────────────────────────────────
+
+const IndicatorsSection: React.FC<{ indicators: StrategyIndicator[] }> = ({ indicators }) => (
+  <div style={card}>
+    <h3 style={{ fontSize: '12px', fontWeight: 700, color: '#3b82f6', margin: '0 0 12px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+      ◆ Indicateurs détectés
+    </h3>
+    {indicators.length === 0 ? (
+      <p style={{ fontSize: '13px', color: '#555555', margin: 0 }}>Aucun indicateur détecté.</p>
+    ) : (
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+        {indicators.map((ind, i) => (
+          <div key={i} style={{ background: 'rgba(59,130,246,0.08)', borderRadius: '10px', padding: '8px 12px', fontSize: '13px', color: '#3b82f6', borderLeft: '3px solid #2563eb', display: 'flex', gap: '6px', alignItems: 'center' }}>
+            <span style={{ fontWeight: 700 }}>{ind.name}</span>
+            {ind.params && <span style={{ color: '#555555', fontSize: '12px' }}>({ind.params})</span>}
           </div>
         ))}
       </div>
@@ -274,22 +303,33 @@ const ImportStrategyPage: NextPage = () => {
 
             <RulesCard title="▲ Conditions d'entrée"   items={result.rules.entry_conditions} accent="#22c55e" bg="rgba(34,197,94,0.08)"  border="rgba(34,197,94,0.20)"  emptyLabel="Aucune condition d'entrée détectée." />
             <RulesCard title="▼ Conditions de sortie"  items={result.rules.exit_conditions}  accent="#ef4444" bg="rgba(239,68,68,0.08)" border="rgba(239,68,68,0.20)" emptyLabel="Aucune condition de sortie détectée." />
-            <RulesCard title="◆ Indicateurs détectés"  items={result.rules.indicators}       accent="#3b82f6" bg="rgba(59,130,246,0.08)" border="rgba(59,130,246,0.20)" emptyLabel="Aucun indicateur détecté." />
+            <IndicatorsSection indicators={result.rules.indicators} />
 
-            {result.rules.risk_management.length > 0 && (
-              <div style={{ ...card, background: '#0D0D0D', border: '1px solid #1F1F1F' }}>
-                <h3 style={{ fontSize: '12px', fontWeight: 700, color: '#888888', margin: '0 0 12px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                  ⚡ Gestion du risque
-                </h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  {result.rules.risk_management.map((item, i) => (
-                    <div key={i} style={{ background: '#1A1A1A', borderRadius: '10px', padding: '10px 14px', border: '1px solid #222222' }}>
-                      <p style={{ fontSize: '13px', color: '#CCCCCC', margin: 0, lineHeight: '1.5' }}>{item}</p>
-                    </div>
-                  ))}
+            {(() => {
+              const risk = result.rules.risk_management;
+              const rows = [
+                { label: 'Stop Loss',       value: risk.stop_loss },
+                { label: 'Take Profit',     value: risk.take_profit },
+                { label: 'Taille position', value: risk.position_size },
+                { label: 'Risk/Reward',     value: risk.risk_reward },
+              ].filter((r) => r.value);
+              if (rows.length === 0) return null;
+              return (
+                <div style={{ ...card, background: '#0D0D0D', border: '1px solid #1F1F1F' }}>
+                  <h3 style={{ fontSize: '12px', fontWeight: 700, color: '#888888', margin: '0 0 12px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                    ⚡ Gestion du risque
+                  </h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {rows.map((r, i) => (
+                      <div key={i} style={{ background: '#1A1A1A', borderRadius: '10px', padding: '10px 14px', border: '1px solid #222222' }}>
+                        <p style={{ fontSize: '11px', color: '#555555', fontWeight: 600, margin: '0 0 2px', textTransform: 'uppercase' }}>{r.label}</p>
+                        <p style={{ fontSize: '13px', color: '#CCCCCC', margin: 0, lineHeight: '1.5' }}>{r.value}</p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              );
+            })()}
 
             <button onClick={() => router.push('/strategies')} style={{ padding: '12px', borderRadius: '12px', border: 'none', background: '#2563eb', color: 'white', fontSize: '14px', fontWeight: 700, cursor: 'pointer', marginTop: '4px' }}>
               Voir mes stratégies →

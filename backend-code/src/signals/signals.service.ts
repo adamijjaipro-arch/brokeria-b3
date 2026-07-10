@@ -258,6 +258,16 @@ export class SignalsService {
     });
   }
 
+  async getSignalById(userId: string, id: string) {
+    const signal = await this.prisma.signal.findUnique({ where: { id } });
+
+    if (!signal || signal.userId !== userId) {
+      throw new NotFoundException(`Signal ${id} not found`);
+    }
+
+    return signal;
+  }
+
   async getSignalsStatistics(userId: string) {
     const signals = await this.prisma.signal.findMany({
       where: { userId },

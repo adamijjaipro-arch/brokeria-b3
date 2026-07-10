@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import type { NextPage } from 'next';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import AppLayout from '../../components/layout/AppLayout';
 import { signalsApi, Signal } from '../../api';
 import PageSEO from '../../components/seo/PageSEO';
+
+const REFRESH_MS = 30_000;
 
 const card: React.CSSProperties = {
   backgroundColor: '#111111',
@@ -58,17 +60,31 @@ const timeLabel = (iso: string) =>
 const SignalsPage: NextPage = () => {
   const router = useRouter();
   const [signals,     setSignals]     = useState<Signal[]>([]);
+  const [isMock,      setIsMock]      = useState(false);
   const [loading,     setLoading]     = useState(true);
   const [filterDir,   setFilterDir]   = useState('Tous');
   const [filterConf,  setFilterConf]  = useState('Tous');
   const [filterAsset, setFilterAsset] = useState('');
 
-  useEffect(() => {
+  const fetchSignals = useCallback(() => {
     signalsApi.getAll()
-      .then(({ data }) => setSignals(data.length > 0 ? data : MOCK_SIGNALS))
-      .catch(() => setSignals(MOCK_SIGNALS))
+      .then(({ data }) => {
+        const useMock = data.length === 0;
+        setSignals(useMock ? MOCK_SIGNALS : data);
+        setIsMock(useMock);
+      })
+      .catch(() => {
+        setSignals(MOCK_SIGNALS);
+        setIsMock(true);
+      })
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    fetchSignals();
+    const id = setInterval(fetchSignals, REFRESH_MS);
+    return () => clearInterval(id);
+  }, [fetchSignals]);
 
   const filtered = signals.filter((s) => {
     const dirOk   = filterDir === 'Tous' || s.direction === filterDir;
@@ -105,7 +121,17 @@ const SignalsPage: NextPage = () => {
       <Head><title>Signaux — Alvio</title></Head>
 
       {/* Header actions */}
-      <div style={{ display: 'flex', gap: '10px', marginBottom: '24px', marginTop: '-8px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '24px', marginTop: '-8px' }}>
+        {isMock && (
+          <span style={{
+            display: 'flex', alignItems: 'center', gap: '6px',
+            padding: '5px 12px', borderRadius: '8px',
+            background: 'rgba(234,179,8,0.12)', border: '1px solid rgba(234,179,8,0.3)',
+            color: '#eab308', fontSize: '12px', fontWeight: 700,
+          }}>
+            ⚠️ Données de démonstration
+          </span>
+        )}
         <button style={{ ...btnFilter(false), marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '6px' }}>
           <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
           Exporter

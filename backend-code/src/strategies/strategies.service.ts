@@ -96,13 +96,22 @@ export class StrategiesService {
 
   private async extractText(file: Express.Multer.File): Promise<string> {
     if (file.mimetype === 'application/pdf') {
-      // pdf-parse v2 exporte une classe PDFParse (plus de fonction directe)
+      // pdf-parse v2 exporte une classe PDFParse (plus de fonction directe).
+      // getText() résout un objet `TextResult` ({ pages, text, total }), pas un string brut.
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       const { PDFParse } = require('pdf-parse') as {
-        PDFParse: new (opts: { data: Buffer }) => { getText(): Promise<string> };
+        PDFParse: new (opts: { data: Buffer }) => {
+          getText(): Promise<{ text?: string }>;
+          destroy(): Promise<void>;
+        };
       };
       const parser = new PDFParse({ data: file.buffer });
-      return parser.getText();
+      try {
+        const result = await parser.getText();
+        return String(result?.text ?? '');
+      } finally {
+        await parser.destroy();
+      }
     }
     return file.buffer.toString('utf-8');
   }
