@@ -22,7 +22,14 @@ let exitCode = 0;
 try {
   run(`docker compose -f "${composeFile}" up -d --wait`);
   run('npx prisma migrate deploy --schema=./prisma/schema.prisma');
-  run('npx jest --config ./test/jest-integration.json --runInBand');
+  // --forceExit : filet de sécurité. Si un module Nest échoue à se compiler
+  // (ex. un provider lève dans son constructeur), app.close() n'est jamais
+  // appelé et des connexions Prisma/Redis restent ouvertes — Jest ne se
+  // termine alors jamais tout seul (déjà arrivé : un job GitHub Actions est
+  // resté bloqué 48min avant annulation manuelle). --forceExit garantit que
+  // le process se termine une fois les résultats des tests calculés/affichés,
+  // sans jamais masquer un échec de test.
+  run('npx jest --config ./test/jest-integration.json --runInBand --forceExit');
 } catch (err) {
   exitCode = 1;
 } finally {

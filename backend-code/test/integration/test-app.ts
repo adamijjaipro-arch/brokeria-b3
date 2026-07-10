@@ -26,7 +26,12 @@ export interface IntegrationTestContext {
 export async function createIntegrationTestApp(): Promise<IntegrationTestContext> {
   const moduleFixture: TestingModule = await Test.createTestingModule({
     imports: [
-      ConfigModule.forRoot({ isGlobal: true }),
+      // ignoreEnvFile: les variables viennent uniquement de .env.test (chargé
+      // par jest-env-setup.ts). Sans ça, ConfigModule charge aussi le .env
+      // local par défaut — ce qui masque en local des variables manquantes
+      // de .env.test qui feraient planter le module en CI (où .env n'existe
+      // pas). C'est exactement ce qui s'est passé avec GITHUB_CLIENT_ID.
+      ConfigModule.forRoot({ isGlobal: true, ignoreEnvFile: true }),
       // SignalSchedulerService injecte SchedulerRegistry (@nestjs/schedule) —
       // il faut ce module pour que la DI se résolve, même si on ne veut pas
       // du vrai scan périodique pendant les tests (cf. nettoyage ci-dessous).

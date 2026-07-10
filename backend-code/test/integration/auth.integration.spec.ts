@@ -14,6 +14,7 @@ describe('Auth Integration Tests (Real DB)', () => {
   });
 
   afterAll(async () => {
+    if (!ctx) return; // createIntegrationTestApp() a échoué avant d'assigner ctx
     await cleanDatabase(ctx.prisma);
     await ctx.app.close();
   });
